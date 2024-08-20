@@ -1,11 +1,26 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./Index.css";
 import AOS from "aos";
 import axios from "axios";
 import config from "../../functions/config";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import { Link, useNavigate } from "react-router-dom";
 
 function Index() {
+  const navigate = useNavigate();
+
+  const [companyName, setCompanyName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [username, setUsername] = useState("");
+  const [gstin, setGstin] = useState("");
+  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState("");
+  const [state, setState] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -32,17 +47,21 @@ function Index() {
 
   useEffect(() => {
     setTimeout(function () {
-      const registerTrial = document.getElementById("registerTrial");
-      const registerForm = document.getElementById("register-form");
-      const formToggler = document.getElementById("trialFormToggler");
+      try {
+        const registerTrial = document.getElementById("registerTrial");
+        const registerForm = document.getElementById("register-form");
+        const formToggler = document.getElementById("trialFormToggler");
 
-      if (!registerTrial.classList.contains("show")) {
-        // registerTrial.classList.toggle("show");
-        formToggler.click();
+        if (!registerTrial.classList.contains("show")) {
+          // registerTrial.classList.toggle("show");
+          formToggler.click();
 
-        if (!registerForm.classList.contains("form_active")) {
-          registerForm.classList.add("form_active");
+          if (!registerForm.classList.contains("form_active")) {
+            registerForm.classList.add("form_active");
+          }
         }
+      } catch (e) {
+        console.log(e);
       }
     }, 18000);
   }, []);
@@ -101,8 +120,8 @@ function Index() {
     document.getElementById("register-form").classList.remove("form_active");
   }
 
-  function checkEmail() {
-    var email = document.getElementById("email").value.trim();
+  function checkEmail(email) {
+    // var email = document.getElementById("email").value.trim();
     if (email != "") {
       var em = {
         email: email,
@@ -110,7 +129,7 @@ function Index() {
       axios
         .get(`${config.base_url}/validate_email/`, { params: em })
         .then((res) => {
-          if (res.is_taken) {
+          if (res.data.is_taken) {
             document.getElementById("email").value = "";
             document.getElementById("emailErr").textContent =
               'Email "' + email + '" already exists..';
@@ -122,7 +141,7 @@ function Index() {
           }
         })
         .catch((err) => {
-            console.log(err)
+          console.log(err);
         });
     } else {
       document.getElementById("emailErr").textContent = "Email is required..";
@@ -131,48 +150,48 @@ function Index() {
     }
   }
 
-  function checkUsername() {
-    if(document.getElementById('register-form').classList.contains('form_active')){
-        var user = document.getElementById("user").value.trim();
-        if (user != "") {
-          var us = {
-            user: user,
-          };
-          axios
-            .get(`${config.base_url}/validate_username/`, { params: us })
-            .then((res) => {
-              if (res.is_taken) {
-                document.getElementById("email").value = "";
-                document.getElementById("userErr").textContent =
-                  'Username "' + user + '" already exists..';
-                document.getElementById("userErr").style.display = "block";
-                document.getElementById("registerBtn").disabled = true;
-              } else {
-                document.getElementById("userErr").style.display = "none";
-                document.getElementById("registerBtn").disabled = false;
-              }
-            })
-            .catch((err) => {
-                console.log(err)
-            });
-        } else {
-          document.getElementById("userErr").textContent = "Username is required..";
-          document.getElementById("userErr").style.display = "block";
-          document.getElementById("registerBtn").disabled = true;
-        }
+  function checkUsername(user) {
+    // if(document.getElementById('register-form').classList.contains('form_active')){
+    // var user = document.getElementById("user").value.trim();
+    if (user != "") {
+      var us = {
+        user: user,
+      };
+      axios
+        .get(`${config.base_url}/validate_username/`, { params: us })
+        .then((res) => {
+          if (res.data.is_taken) {
+            document.getElementById("email").value = "";
+            document.getElementById("userErr").textContent =
+              'Username "' + user + '" already exists..';
+            document.getElementById("userErr").style.display = "block";
+            document.getElementById("registerBtn").disabled = true;
+          } else {
+            document.getElementById("userErr").style.display = "none";
+            document.getElementById("registerBtn").disabled = false;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      document.getElementById("userErr").textContent = "Username is required..";
+      document.getElementById("userErr").style.display = "block";
+      document.getElementById("registerBtn").disabled = true;
     }
+    // }
   }
 
-  function checkPhone() {
-    var phone = document.getElementById("phone").value.trim();
+  function checkPhone(phone) {
+    // var phone = document.getElementById("phone").value.trim();
     if (phone != "") {
       var em = {
         phone: phone,
       };
       axios
-        .get(`${config.base_url}/validate_phone/`, { params: em })
+        .get(`${config.base_url}/validate_phone_number/`, { params: em })
         .then((res) => {
-          if (res.is_taken) {
+          if (res.data.is_taken) {
             document.getElementById("phone").value = "";
             document.getElementById("phoneErr").textContent =
               'Phone number "' + phone + '" already exists..';
@@ -184,25 +203,26 @@ function Index() {
           }
         })
         .catch((err) => {
-            console.log(err)
+          console.log(err);
         });
     } else {
-      document.getElementById("phoneErr").textContent = "Phone number is required..";
+      document.getElementById("phoneErr").textContent =
+        "Phone number is required..";
       document.getElementById("phoneErr").style.display = "block";
       document.getElementById("registerBtn").disabled = true;
     }
   }
 
-  function checkCompany() {
-    var company = document.getElementById("company").value.trim();
+  function checkCompany(company) {
+    // var company = document.getElementById("company").value.trim();
     if (company != "") {
       var cmp = {
         company: company,
       };
       axios
-        .get(`${config.base_url}/validate_company/`, { params: cmp })
+        .get(`${config.base_url}/validate_company_name/`, { params: cmp })
         .then((res) => {
-          if (res.is_taken) {
+          if (res.data.is_taken) {
             document.getElementById("company").value = "";
             document.getElementById("cmpErr").textContent =
               'Company "' + company + '" already exists..';
@@ -214,14 +234,75 @@ function Index() {
           }
         })
         .catch((err) => {
-            console.log(err)
+          console.log(err);
         });
     } else {
-      document.getElementById("cmpErr").textContent = "Company Name is required..";
+      document.getElementById("cmpErr").textContent =
+        "Company Name is required..";
       document.getElementById("cmpErr").style.display = "block";
       document.getElementById("registerBtn").disabled = true;
     }
   }
+
+  const handleSubmit = (e) => {
+    const formToggler = document.getElementById("trialFormToggler");
+    formToggler.click();
+
+    e.preventDefault();
+    let valid = validate();
+    if (valid) {
+      const data = {
+        company_name: companyName,
+        phone_number: phoneNumber,
+        gstin: gstin,
+        address: address,
+        country: country,
+        state: state,
+        username: username,
+        email: email,
+        password: password,
+        confirm_password: confirmPassword
+      };
+      axios
+        .post(`${config.base_url}/register_trial_user/`, data, {
+          headers: { "Content-Type": "application/json" },
+        })
+        .then((res) => {
+          if (res.data.status) {
+            Toast.fire({
+              icon: "success",
+              title: "Registered successfully",
+            });
+            navigate("/login");
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          if (!err.response.data.status) {
+            Swal.fire({
+              icon: "error",
+              title: `${err.response.data.message}`,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                formToggler.click();
+              }
+            });
+          }
+        });
+    }
+  };
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
 
   return (
     <>
@@ -272,9 +353,9 @@ function Index() {
                   <span className="hover" />
                 </li>
                 <li>
-                  <a className="loginBtn" href="{% url 'login' %}">
+                  <Link className="loginBtn" to="/login">
                     Login
-                  </a>
+                  </Link>
                 </li>
               </ul>
               <i className="bi bi-list mobile-nav-toggle" />
@@ -1177,13 +1258,7 @@ function Index() {
                   onClick={deactivateForm}
                 />
               </div>
-              <form
-                action="{% url 'registerTrialUser' %}"
-                method="post"
-                className=""
-                id="register-form"
-                onsubmit="return validate()"
-              >
+              <form className="" id="register-form" onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="row">
                     <div className="col-md-6">
@@ -1194,7 +1269,10 @@ function Index() {
                           placeholder="Username"
                           name="username"
                           id="user"
-                          required=""
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          onBlur={(e) => checkUsername(e.target.value)}
+                          required
                         />
                       </div>
                       <span
@@ -1218,7 +1296,10 @@ function Index() {
                           name="email"
                           pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                           id="email"
-                          required=""
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          onBlur={(e) => checkEmail(e.target.value)}
+                          required
                         />
                       </div>
                       <span
@@ -1242,7 +1323,10 @@ function Index() {
                           name="phone"
                           id="phone"
                           title="Ex: 9048986656"
-                          required=""
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          onBlur={(e) => checkPhone(e.target.value)}
+                          required
                         />
                       </div>
                       <span
@@ -1265,7 +1349,10 @@ function Index() {
                           placeholder="Company Name"
                           name="company"
                           id="company"
-                          required=""
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          onBlur={(e) => checkCompany(e.target.value)}
+                          required
                         />
                       </div>
                       <span
@@ -1289,6 +1376,8 @@ function Index() {
                           name="gstnum"
                           id="gstin"
                           title="Ex: 22AAAAA0000A1Z5"
+                          value={gstin}
+                          onChange={(e) => setGstin(e.target.value)}
                         />
                         <div
                           className="text-danger"
@@ -1311,7 +1400,9 @@ function Index() {
                           id="address"
                           cols=""
                           rows={3}
-                          required=""
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -1323,7 +1414,9 @@ function Index() {
                           placeholder="Country"
                           name="country"
                           id="couuntry"
-                          required=""
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -1335,7 +1428,9 @@ function Index() {
                           id="state"
                           name="state"
                           style={{ border: "none" }}
-                          required=""
+                          value={state}
+                          onChange={(e) => setState(e.target.value)}
+                          required
                         >
                           <option value="" selected="">
                             Choose State..
@@ -1404,7 +1499,10 @@ function Index() {
                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                           title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
                           name="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                           id="pwd"
+                          required
                         />
                         <i
                           className="fa fa-eye eye-icon"
@@ -1425,7 +1523,9 @@ function Index() {
                           placeholder="Confirm Password"
                           name="confirmPassword"
                           id="cnfpwd"
-                          required=""
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
                         />
                         <div
                           className="text-danger"

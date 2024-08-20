@@ -1,0 +1,316 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+    background: white;
+}
+
+body,
+input {
+  font-family: "Poppins", sans-serif;
+}
+.login-section {
+  transition: transform 1.1s ease-in-out;
+  transition-delay: 0.4s;
+}
+.register-section {
+  transition: transform 1.1s ease-in-out;
+  transition-delay: 0.4s;
+}
+.login-form-section {
+  height: 100vh;
+  background: #003e29;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+.reg-form-section {
+  height: max-content;
+  padding: 2.5rem 0;
+  background: #003e29;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.login-section form {
+  display: flex;
+  width: 75%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0rem 2rem;
+  transition: all 0.2s 0.7s;
+}
+
+.title {
+  font-size: 2.2rem;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.forgot-password {
+  text-decoration: none;
+  font-size: 12px;
+  color: rgb(235, 235, 243) !important;
+}
+.input-field {
+  max-width: 380px;
+  width: 100%;
+  /* background-color: #f0f0f0; */
+  background-color: #fff;
+  margin: 10px 0;
+  height: 55px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 15% 85%;
+  padding: 0 0.4rem;
+  position: relative;
+}
+.input-field.textarea {
+  max-width: 380px;
+  width: 100%;
+  /* background-color: #f0f0f0; */
+  background-color: #fff;
+  margin: 10px 0;
+  height: 100px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.4rem;
+  position: relative;
+}
+
+.input-field i {
+  text-align: center;
+  line-height: 55px;
+  color: #acacac;
+  transition: 0.5s;
+  font-size: 1rem;
+}
+
+.input-field input {
+  background: none;
+  outline: none;
+  border: none;
+  line-height: 1;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+.input-field textarea {
+  background: none;
+  outline: none;
+  border: none;
+  resize: none;
+  line-height: 1;
+  height: 100%;
+  padding: 1rem 0.5rem;
+  width: 100%;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+#state:focus {
+  box-shadow: none;
+}
+
+.input-field input::placeholder,
+.input-field textarea::placeholder {
+  color: #aaa;
+  font-weight: 500;
+}
+
+.btn {
+  width: 150px;
+  background-color: #17815d;
+  border: 1px solid #e5e5e5;
+  outline: none;
+  height: 49px;
+  border-radius: 49px;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.btn:hover {
+  background-color: #fff;
+  color: #003e27;
+  border: 2px solid #003e27;
+}
+
+.image {
+  height: 65vh;
+  width: 100%;
+  transition: transform 1.1s ease-in-out;
+  transition-delay: 0.4s;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-around;
+  text-align: center;
+  z-index: 6;
+}
+
+.left-panel {
+  /* pointer-events: all; */
+  padding: 3rem 17% 2rem 12%;
+}
+
+.right-panel {
+  /* pointer-events: none; */
+  /* padding: 3rem 12% 2rem 17%; */
+  padding: 3rem 24% 2rem 24%;
+}
+
+.panel .content {
+  /* color: #fff; */
+  transition: transform 0.9s ease-in-out;
+  transition-delay: 0.6s;
+}
+
+.panel h3 {
+  font-weight: 600;
+  line-height: 1;
+  font-size: 1.5rem;
+}
+
+.panel p {
+  font-size: 0.95rem;
+  padding: 0.7rem 0;
+}
+
+.btn.transparent {
+  margin: 0;
+  /* background: none; */
+  border: 2px solid #003e27;
+  width: 130px;
+  height: 41px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 870px) {
+  .panel {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 2.5rem 8%;
+    grid-column: 1 / 2;
+  }
+
+  .right-panel {
+    grid-row: 3 / 4;
+  }
+
+  .left-panel {
+    grid-row: 1 / 2;
+  }
+
+  .image {
+    width: 200px;
+    transition: transform 0.9s ease-in-out;
+    transition-delay: 0.6s;
+  }
+
+  .panel .content {
+    padding-right: 15%;
+    transition: transform 0.9s ease-in-out;
+    transition-delay: 0.8s;
+  }
+
+  .panel h3 {
+    font-size: 1.2rem;
+  }
+
+  .panel p {
+    font-size: 0.7rem;
+    padding: 0.5rem 0;
+  }
+
+  .btn.transparent {
+    width: 110px;
+    height: 35px;
+    font-size: 0.7rem;
+  }
+}
+@media (max-width: 768px) {
+  .login-section .row {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
+@media (max-width: 570px) {
+  form {
+    padding: 0 1.5rem;
+  }
+
+  .image {
+    display: none;
+  }
+
+  .panel .content {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* The alert message box */
+.alert {
+  padding: 15px;
+  background-color: rgb(155, 155, 155); /* Red */
+  /* color: darkred; */
+  color: white;
+  margin-bottom: 15px;
+  width: 60%;
+  height: 70px;
+}
+
+/* The close button */
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* When moving the mouse over the close button */
+.closebtn:hover {
+  color: black;
+}
+.forgot-password {
+  text-decoration: none;
+  font-size: 12px;
+  color: rgb(42, 41, 85);
+}
+.forgot-password:hover {
+  color: rgb(35, 34, 103);
+  opacity: 0.8;
+}
+.submit_btn,
+.submitunit_btn {
+  background: #c6aa589e;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.submit_btn:hover,
+.submitunit_btn:hover {
+  background: #c6aa58;
+}

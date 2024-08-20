@@ -7,7 +7,7 @@ class Company(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company_name = models.CharField(max_length=200)
     phone_number = models.BigIntegerField(null= True, blank= True)
-    gst_number = models.CharField(max_length=50)
+    gst_number = models.CharField(max_length=50, null=True, blank=True)
     address = models.TextField()
     state = models.CharField(max_length=150,null=True,blank=True)
     country = models.CharField(max_length=150,null=True,blank=True)
