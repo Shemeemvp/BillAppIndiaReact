@@ -34,7 +34,7 @@ from .serializers import *
 # Create your views here.
 
 
-def home():
+def home(request):
     return HttpResponse("Okay")
 
 
@@ -158,7 +158,7 @@ def userLogin(request):
                         "user": str(user.id),
                         "refresh": str(refresh),
                         "access": str(refresh.access_token),
-                        "role": "Admin"
+                        "role": "Admin",
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -174,7 +174,7 @@ def userLogin(request):
                             "user": str(user.id),
                             "refresh": str(refresh),
                             "access": str(refresh.access_token),
-                            "role": "User"
+                            "role": "User",
                         },
                         status=status.HTTP_200_OK,
                     )
@@ -212,7 +212,7 @@ def userLogin(request):
                                 "user": str(user.id),
                                 "refresh": str(refresh),
                                 "access": str(refresh.access_token),
-                                "role": "User"
+                                "role": "User",
                             },
                             status=status.HTTP_200_OK,
                         )
@@ -278,3 +278,114 @@ def validateCompany(request):
         return JsonResponse({"is_taken": True})
     else:
         return JsonResponse({"is_taken": False})
+
+
+# Admin
+
+
+@api_view(("GET",))
+def fetchRegisteredClients(request):
+    try:
+        all_companies = Company.objects.all()
+        clients = []
+        for i in all_companies:
+            if ClientTrials.objects.filter(company=i).exists():
+                trial = ClientTrials.objects.filter(company=i).first()
+            else:
+                trial = None
+
+            dict = {
+                "user_id": i.user.id,
+                "company_name": i.company_name,
+                "email": i.user.email,
+                "contact": i.phone_number,
+                "gstin": i.gst_number,
+                "start_date": trial.start_date if trial else "",
+            }
+            clients.append(dict)
+
+        return Response(
+            {"status": True, "clients": clients},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deleteClient(request, id):
+    try:
+        user = User.objects.get(id=id)
+        user.delete()
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def fetchPaymentTerms(request):
+    try:
+        terms = PaymentTerms.objects.all()
+        termsSerializer = PaymentTermsSerializer(terms, many=True)
+        return Response(
+            {"status": True, "terms": termsSerializer.data},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deletePaymentTerm(request, id):
+    try:
+        term = PaymentTerms.objects.get(id=id)
+        term.delete()
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def createNewPaymentTerm(request):
+    try:
+        dur = request.data["duration"]
+        term = request.data["term"]
+        dys = int(dur) if term == "Days" else int(dur) * 30
+        request.data["days"] = dys
+
+        # PaymentTerms.objects.create(duration=dur, term=term, days=dys)
+        serializer = PaymentTermsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"status": True, "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_200_OK,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

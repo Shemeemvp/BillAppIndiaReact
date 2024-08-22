@@ -13,14 +13,15 @@ import "primeicons/primeicons.css";
 import "primereact/resources/primereact.min.css";
 import axios from "axios";
 import config from "../../functions/config";
+import { Link } from "react-router-dom";
 
-function AdminHome() {
+function PaymentTerms() {
   function activeLink() {
     var nav_links = document.querySelectorAll(".nav-item.nav-link");
 
     for (var i = 0; i < nav_links.length; i++) {
       nav_links[i].classList.remove("active");
-      if (nav_links[i].classList.contains("nav-reg-clients")) {
+      if (nav_links[i].classList.contains("nav-payment-terms")) {
         nav_links[i].classList.add("active");
         break;
       }
@@ -34,23 +35,21 @@ function AdminHome() {
   const [data, setData] = useState([]);
   const [globalFilter, setGlobalFilter] = useState(null);
 
-  function fetchClients() {
+  function fetchTerms() {
     axios
-      .get(`${config.base_url}/get_registered_clients/`)
+      .get(`${config.base_url}/get_payment_terms/`)
       .then((res) => {
         if (res.data.status) {
-          const clnts = res.data.clients;
-
-          const cmpns = clnts.map((i) => ({
-            id: i.user_id || "",
-            companyName: i.company_name || "",
-            email: i.email || "",
-            contact: i.contact || "",
-            gstin: i.gstin || "",
-            registeredDate: i.start_date || "",
+          const terms = res.data.terms;
+          console.log(terms);
+          const trms = terms.map((i) => ({
+            id: i.id || "",
+            duration: i.duration || "",
+            term: i.term || "",
+            days: i.days || "",
           }));
 
-          setData(cmpns);
+          setData(trms);
         }
       })
       .catch((err) => {
@@ -59,12 +58,12 @@ function AdminHome() {
   }
 
   useEffect(() => {
-    fetchClients();
+    fetchTerms();
   }, []);
 
-  function handleDeleteClient(id) {
+  function handleDeleteTerm(id) {
     Swal.fire({
-      title: `Delete Client?`,
+      title: `Delete Payment Term?`,
       text: "All details will be erased.!",
       icon: "warning",
       showCancelButton: true,
@@ -74,14 +73,14 @@ function AdminHome() {
     }).then((result) => {
       if (id != "" && result.isConfirmed) {
         axios
-          .delete(`${config.base_url}/delete_client/${id}/`)
+          .delete(`${config.base_url}/delete_payment_term/${id}/`)
           .then((res) => {
             if (res.data.status) {
               Toast.fire({
                 icon: "success",
-                title: "User removed.",
+                title: "Term removed.",
               });
-              fetchClients();
+              fetchTerms();
             }
           })
           .catch((err) => {
@@ -98,9 +97,6 @@ function AdminHome() {
         onInput={(e) => setGlobalFilter(e.target.value)}
         placeholder="Search"
       />
-      {/* <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-      </span> */}
     </div>
   );
 
@@ -115,7 +111,6 @@ function AdminHome() {
       toast.onmouseleave = Swal.resumeTimer;
     },
   });
-
   return (
     <>
       <div
@@ -127,14 +122,40 @@ function AdminHome() {
           <AdminNav />
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">
-              <div className="Registered_clients py-4">
+              <div className="Payment_terms py-4">
                 <div className="row">
                   <div className="col-md-12">
                     <div
-                      className="reg_clients px-3 py-3"
+                      className="pay_terms p-3"
                       style={{ backgroundColor: "#eae9c4" }}
                     >
-                      <h4 className="ms-2">Registered Clients</h4>
+                      <div className="row mb-2">
+                        <div className="col-12 col-lg-12 col-xl-12">
+                          <div
+                            className="card"
+                            style={{ backgroundColor: "#ddddbeed" }}
+                          >
+                            <div className="row no-gutters">
+                              <div className="col-md-2" />
+                              <div className="col-md-8 mt-4 mb-4">
+                                <center>
+                                  <h4 className="card-title text-dark">
+                                    PAYMENT TERMS
+                                  </h4>
+                                </center>
+                              </div>
+                              <div className="col-md-2" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row mb-2">
+                        <Link to="/add_payment_terms">
+                          <button className="btn btn-sm btn-success">
+                            <i className="fas fa-plus me-2" /> ADD NEW
+                          </button>
+                        </Link>
+                      </div>
                       <DataTable
                         value={data}
                         paginator
@@ -144,30 +165,18 @@ function AdminHome() {
                       >
                         <Column field="id" header="#" sortable></Column>
                         <Column
-                          field="companyName"
-                          header="Company Name"
+                          field="duration"
+                          header="Duration"
                           sortable
                         ></Column>
-                        <Column field="email" header="Email" sortable></Column>
+                        <Column field="term" header="Term" sortable></Column>
+                        <Column field="days" header="Days" sortable></Column>
                         <Column
-                          field="contact"
-                          header="Contact"
-                          sortable
-                        ></Column>
-                        <Column field="gstin" header="GSTIN" sortable></Column>
-                        <Column
-                          field="registeredDate"
-                          header="Registered Date"
-                          sortable
-                        ></Column>
-                        <Column
-                          header=""
+                          header="Action"
                           body={(rowData) => (
                             <button
                               className="btn bt-sm btn-outline-danger fa fa-trash mb-1"
-                              onClick={() =>
-                                handleDeleteClient(`${rowData.id}`)
-                              }
+                              onClick={() => handleDeleteTerm(`${rowData.id}`)}
                             ></button>
                           )}
                         ></Column>
@@ -185,4 +194,4 @@ function AdminHome() {
   );
 }
 
-export default AdminHome;
+export default PaymentTerms;

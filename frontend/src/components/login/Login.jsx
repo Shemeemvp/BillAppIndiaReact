@@ -110,7 +110,7 @@ function Login() {
                     <input
                       type="submit"
                       defaultValue="Login"
-                      className="btn solid"
+                      className="btn bttn solid"
                     />
                     <a
                       href="#forgot_password"
@@ -316,7 +316,7 @@ function Login() {
                     </div>
                     <input
                       type="submit"
-                      className="btn"
+                      className="btn bttn"
                       defaultValue="Sign up"
                     />
                   </form>

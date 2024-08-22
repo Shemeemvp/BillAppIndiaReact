@@ -126,7 +126,7 @@ input {
   font-weight: 500;
 }
 
-.btn {
+.bttn {
   width: 150px;
   background-color: #17815d;
   border: 1px solid #e5e5e5;
@@ -141,7 +141,7 @@ input {
   transition: 0.5s;
 }
 
-.btn:hover {
+.bttn:hover {
   background-color: #fff;
   color: #003e27;
   border: 2px solid #003e27;

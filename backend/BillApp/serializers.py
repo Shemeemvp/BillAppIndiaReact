@@ -21,3 +21,8 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
+
+class PaymentTermsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentTerms
+        fields = '__all__'
