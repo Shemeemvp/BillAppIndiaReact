@@ -26,3 +26,13 @@ class PaymentTermsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentTerms
         fields = '__all__'
+
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Items
+        fields = '__all__'
+
+class UnitsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item_units
+        fields = '__all__'

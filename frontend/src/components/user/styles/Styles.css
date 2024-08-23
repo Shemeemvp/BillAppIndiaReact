@@ -1,0 +1,21 @@
+.p-datatable-tbody tr td{
+    padding: 0.2rem 0rem;
+}
+
+.p-datatable-thead tr th{
+    padding: 0.2rem 0rem;
+    border-bottom: 1px solid gray;
+}
+
+.userDashboard .bg-light{
+    background: #eae9c4 !important;
+}
+.userDashboard .bg-white {
+    background-color: #407d58!important;
+}
+.userDashboard .content {
+    background: rgb(255, 255, 255);
+}
+.userDashboard .text-primary{
+    color: #003e27 !important;
+}

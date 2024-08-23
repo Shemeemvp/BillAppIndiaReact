@@ -6,7 +6,7 @@ function AdminSidebar() {
   return (
     <div className="sidebar b-primary pe-4 pb-3">
       <nav className="navbar b-primary navbar-dark">
-        <a href="/go_dashboard" className="navbar-brand mx-4 mb-3">
+        <a href="#" className="navbar-brand mx-4 mb-3">
           <h4 className="text-light">BillingSoftware</h4>
         </a>
         <div className="d-flex align-items-center ms-4 mb-4">
@@ -32,14 +32,14 @@ function AdminSidebar() {
             Registered Clients
           </li>
           <li
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/demo_clients")}
             className="nav-item nav-link nav-demo-clients"
           >
             <i className="fas fa-user-clock me-2" />
             Demo Clients
           </li>
           <li
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/purchased_clients")}
             className="nav-item nav-link nav-purchased-clients"
           >
             <i className="fas fa-user-check me-2" />
@@ -47,7 +47,7 @@ function AdminSidebar() {
           </li>
           <li
             onClick={() => navigate("/payment_terms")}
-            className="nav-item nav-link nav-payment-terms d-flex align-items-center"
+            className="nav-item nav-link nav-payment-terms"
           >
             <i className="fas fa-cubes me-2" />
             Payment Terms

@@ -1,0 +1,80 @@
+.userAddItems .switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.userAddItems .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.userAddItems .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.userAddItems .slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.userAddItems .slider {
+  background-color: #2196f3;
+}
+.userAddItems input:checked + .slider {
+  background-color: #ccc;
+}
+
+.userAddItems input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 4px;
+}
+
+/* Rounded sliders */
+.userAddItems .slider.round {
+  border-radius: 32px;
+}
+
+.userAddItems .slider.round:before {
+  border-radius: 50%;
+}
+.userAddItems .submit_btn,
+.userAddItems .barcode_btn,
+.userAddItems .submitunit_btn {
+  background: #c6aa589e;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.userAddItems .submit_btn:hover,
+.userAddItems .barcode_btn:hover,
+.userAddItems .submitunit_btn:hover {
+  background: #c6aa58;
+}
+.userAddItems input:read-only {
+  background: #fff !important;
+}

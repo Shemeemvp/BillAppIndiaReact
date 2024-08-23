@@ -1,0 +1,8 @@
+.p-datatable-tbody tr td{
+    padding: 0.2rem 0rem;
+}
+
+.p-datatable-thead tr th{
+    padding: 0.2rem 0rem;
+    border-bottom: 1px solid gray;
+}

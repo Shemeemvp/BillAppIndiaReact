@@ -389,3 +389,249 @@ def createNewPaymentTerm(request):
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+@api_view(("GET",))
+def fetchDemoClients(request):
+    try:
+        d_clients = ClientTrials.objects.filter(
+            Q(trial_status=True) | (Q(trial_status=False) & Q(subscribe_status="yes"))
+        )
+        clients = []
+        for i in d_clients:
+
+            dict = {
+                "trial_id": i.id,
+                "company_name": i.company.company_name,
+                "email": i.user.email,
+                "contact": i.company.phone_number,
+                "gstin": i.company.gst_number,
+                "end_date": i.end_date,
+                "purchase_status": (
+                    "Interested"
+                    if i.subscribe_status == "yes"
+                    else "Not Interested" if i.subscribe_status == "no" else "N/A"
+                ),
+            }
+            clients.append(dict)
+
+        return Response(
+            {"status": True, "clients": clients},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def clientPurchase(request):
+    try:
+        client = ClientTrials.objects.get(id=request.data["id"])
+        start = request.data["purchaseDate"]
+        end = request.data["endDate"]
+        term = PaymentTerms.objects.get(id=request.data["term"])
+
+        client.purchase_start_date = start
+        client.purchase_end_date = end
+        client.payment_term = str(term.duration) + " " + term.term
+        client.purchase_status = "valid"
+        client.trial_status = False
+        client.subscribe_status = "purchased"
+        client.save()
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def fetchPurchasedClients(request):
+    try:
+        d_clients = ClientTrials.objects.exclude(purchase_status="null")
+        clients = []
+        for i in d_clients:
+
+            dict = {
+                "trial_id": i.id,
+                "company_name": i.company.company_name,
+                "email": i.user.email,
+                "contact": i.company.phone_number,
+                "gstin": i.company.gst_number,
+                "start_date": i.purchase_start_date,
+                "end_date": i.purchase_end_date,
+                "payment_term": i.payment_term,
+                "purchase_status": i.purchase_status,
+            }
+            clients.append(dict)
+
+        return Response(
+            {"status": True, "clients": clients},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def cancelSubscription(request):
+    try:
+        client = ClientTrials.objects.get(id=request.data["id"])
+        client.purchase_status = "cancelled"
+        client.save()
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# User
+
+
+@api_view(("GET",))
+def getSelfData(request, id):
+    try:
+        user = User.objects.get(id=id)
+        img = None
+        name = None
+        if user:
+            usrData = Company.objects.get(user=user)
+            img = usrData.logo.url if usrData.logo else None
+            name = usrData.company_name
+        else:
+            usrData = None
+        details = {"name": name, "image": img}
+
+        return Response({"status": True, "data": details})
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getItemUnits(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        units = Item_units.objects.filter(cid=cmp)
+        serializer = UnitsSerializer(units, many=True)
+        return Response(
+            {"status": True, "units": serializer.data}, status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def createNewUnit(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+        sym = request.data["symbol"]
+        name = request.data["name"]
+        unit = Item_units(cid=cmp, symbol=sym, name=name)
+        unit.save()
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def checkItemBarcode(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        bc = request.GET["barcode"]
+        if Items.objects.filter(cid=cmp, barcode=bc).exists():
+            item = Items.objects.get(cid=cmp, barcode=bc)
+            return Response(
+                {
+                    "status": False,
+                    "message": f"Barcode is already associated with item - '{item.name}',\nTry again..",
+                },
+                status=status.HTTP_226_IM_USED,
+            )
+        else:
+            return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def createNewItem(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+        request.data["cid"] = cmp.cmp_id
+
+        bc = request.data["barcode"]
+        if bc != "":
+            bc = bc.upper()
+        if Items.objects.filter(cid=cmp, barcode=bc).exists():
+            return Response(
+                {"status": False, "message": "Barcode already exists, try another.!"},
+                status=status.HTTP_226_IM_USED,
+            )
+        tax = request.data["tax_reference"]
+        request.data["tax"] = "Taxable" if tax else "Non-taxable"
+        request.data["gst"] = "GST0[0%]" if not tax else request.data["gst"]
+        request.data["igst"] = "IGST0[0%]" if not tax else request.data["igst"]
+
+        serializer = ItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            item = Items.objects.get(id=serializer.data["id"])
+
+            transaction = Item_transactions(
+                cid=cmp,
+                item=item,
+                type="Opening Stock",
+                date=item.date,
+                quantity=item.stock,
+            )
+            transaction.save()
+
+            return Response(
+                {"status": True, "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_200_OK,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

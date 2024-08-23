@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import AdminNav from "./AdminNav";
 import AdminFooter from "./AdminFooter";
-import "./AdminBase.css";
+import "./styles/AdminBase.css";
+import "./styles/AdminStyles.css";
 import Swal from "sweetalert2";
 // import DataTable from "react-data-table-component";
 import { DataTable } from "primereact/datatable";
@@ -41,7 +42,8 @@ function AdminHome() {
         if (res.data.status) {
           const clnts = res.data.clients;
 
-          const cmpns = clnts.map((i) => ({
+          const cmpns = clnts.map((i, index) => ({
+            slno: index + 1,
             id: i.user_id || "",
             companyName: i.company_name || "",
             email: i.email || "",
@@ -142,7 +144,7 @@ function AdminHome() {
                         header={header}
                         globalFilter={globalFilter}
                       >
-                        <Column field="id" header="#" sortable></Column>
+                        <Column field="slno" header="#" sortable></Column>
                         <Column
                           field="companyName"
                           header="Company Name"

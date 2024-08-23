@@ -1,4 +1,4 @@
-body {
+.indexBody {
   font-family: "Open Sans", sans-serif;
   color: #444444;
 }
@@ -151,7 +151,7 @@ h6 {
   position: relative;
 }
 
-.navbar a {
+#indexNav .navbar a {
   padding: 10px 15px;
   font-size: 14px;
   font-weight: 600;
@@ -175,19 +175,19 @@ h6 {
   opacity: 0;
 }
 
-.navbar a i {
+#indexNav .navbar a i {
   font-size: 12px;
   line-height: 0;
   margin-left: 5px;
 }
 
-.navbar a:hover,
-.navbar .active,
-.navbar li:hover > a {
+#indexNav .navbar a:hover,
+#indexNav .navbar .active,
+#indexNav .navbar li:hover > a {
   color: #fff;
 }
 
-.navbar .loginBtn {
+#indexNav .navbar .loginBtn {
   background: #003e27 !important;
   font-weight: bold;
   color: #fff !important;

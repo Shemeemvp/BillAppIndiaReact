@@ -305,8 +305,8 @@ function Index() {
   });
 
   return (
-    <>
-      <>
+    <div className="indexBody">
+      <div id="indexNav">
         <div id="bg">
           <canvas />
           <canvas />
@@ -1552,8 +1552,8 @@ function Index() {
             </div>
           </div>
         </div>
-      </>
-    </>
+      </div>
+    </div>
   );
 }
 

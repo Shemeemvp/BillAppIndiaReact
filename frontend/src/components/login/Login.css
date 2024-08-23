@@ -6,11 +6,11 @@
   box-sizing: border-box;
 }
 
-body{
-    background: white;
+.loginBody {
+  background: white;
 }
 
-body,
+.loginBody,
 input {
   font-family: "Poppins", sans-serif;
 }

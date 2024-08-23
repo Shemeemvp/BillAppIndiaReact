@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import AdminNav from "./AdminNav";
 import AdminFooter from "./AdminFooter";
-import "./AdminBase.css";
+import "./styles/AdminBase.css";
 import Swal from "sweetalert2";
 import axios from "axios";
 import config from "../../functions/config";

@@ -12,15 +12,26 @@ function AdminNav() {
     Cookies.remove("role");
     navigate("/");
   }
+
+  function toggleSidebar(event) {
+    event.preventDefault();
+
+    document.querySelector(".sidebar").classList.toggle("open");
+    document.querySelector(".content").classList.toggle("open");
+    // document.querySelectorAll(".sidebar-toggler").forEach(function (toggler) {
+    //   toggler.addEventListener("click", function (event) {
+    //   });
+    // });
+  }
   return (
     <nav className="navbar navbar-expand b-primary navbar-dark sticky-top px-4 py-0">
       <a href="/go_dashboard" className="navbar-brand d-flex d-lg-none me-4">
         <h2 className="text-white mb-0">BS</h2>
       </a>
       <a
-        href="#"
+        onClick={toggleSidebar}
         className="sidebar-toggler flex-shrink-0"
-        style={{ textDecoration: "none" }}
+        style={{ textDecoration: "none", cursor: "pointer" }}
       >
         <i className="fa fa-bars text-light" />
       </a>
@@ -84,7 +95,7 @@ function AdminNav() {
             </span>
           </a>
           <div className="dropdown-menu dropdown-menu-end bg-dark border-0 rounded-0 rounded-bottom m-0">
-            <a onClick={handleLogout} className="dropdown-item">
+            <a onClick={handleLogout} className="dropdown-item" style={{cursor:"pointer"}}>
               Log Out
             </a>
           </div>
