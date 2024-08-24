@@ -28,11 +28,11 @@ function Dashboard() {
   return (
     <>
       <div
-        class="container-fluid position-relative d-flex p-0 userDashboard"
+        className="container-fluid position-relative d-flex p-0 userDashboard"
         id="userSection"
       >
         <UserSidebar />
-        <div class="content">
+        <div className="content">
           <UserNavbar />
           <main>
             <div className="container-fluid pt-4 px-4">

@@ -165,3 +165,14 @@ input:checked + .slider:before {
   top: 0;
   background-color: #eae9c4;
 }
+
+@media print {
+  .userItems .page[size="A4"] {
+    width: 21cm;
+    height: 29.7cm;
+  }
+}
+
+.trns_table_menu .dropdown-toggle::after{
+  content: none;
+}

@@ -11,6 +11,9 @@ import CompanyPrivateRoutes from "./components/routes/CompanyPrivateRoutes";
 import Dashboard from "./components/user/Dashboard";
 import Items from "./components/user/Items";
 import AddItems from "./components/user/AddItems";
+import EditTransaction from "./components/user/EditTransaction";
+import ViewItem from "./components/user/ViewItem";
+import EditItem from "./components/user/EditItem";
 
 function App() {
   return (
@@ -32,6 +35,9 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />}></Route>
             <Route path="/items" element={<Items />}></Route>
             <Route path="/add_items" element={<AddItems />}></Route>
+            <Route path="/edit_item/:itemId/" element={<EditItem />}></Route>
+            <Route path="/view_item/:itemId/" element={<ViewItem />}></Route>
+            <Route path="/edit_item_transaction/:transactionId/" element={<EditTransaction />}></Route>
           </Route>
         </Routes>  
       </BrowserRouter>

@@ -26,5 +26,13 @@ urlpatterns = [
     path("create_new_unit/", createNewUnit),
     path('check_item_barcode/', checkItemBarcode),
     path("create_new_item/", createNewItem),
+    path("update_stock/", updateStock),
+    path("get_items/<int:id>/", getItems),
+    path("get_item_details/", getItemDetails),
+    path("get_transaction_details/<int:id>/", getTransactionDetails),
+    path("delete_item_transaction/<int:id>/", deleteTransaction),
+    path("update_transaction/", updateTransaction),
+    path("delete_item/<int:id>/", deleteItem),
+    path("update_item/", updateItem),
     # path('get_barcode_details',views.getBarcodeDetails, name='getBarcodeDetails'),
 ]

@@ -28,11 +28,11 @@ function Items() {
   return (
     <>
       <div
-        class="container-fluid position-relative d-flex p-0 userDashboard"
+        className="container-fluid position-relative d-flex p-0 userDashboard"
         id="userSection"
       >
         <UserSidebar />
-        <div class="content">
+        <div className="content">
           <UserNavbar />
           <main>
             

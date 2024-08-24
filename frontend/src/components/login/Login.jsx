@@ -194,7 +194,7 @@ function Login() {
                     />
                   </div>
                   <div className="input-field textarea">
-                    {/* <i class="fa fa-address-card"></i> */}
+                    {/* <i className="fa fa-address-card"></i> */}
                     <textarea
                       name="address"
                       placeholder="Address"

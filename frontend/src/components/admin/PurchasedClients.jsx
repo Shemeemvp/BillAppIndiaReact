@@ -272,11 +272,11 @@ function PurchasedClients() {
   return (
     <>
       <div
-        class="container-fluid position-relative d-flex p-0"
+        className="container-fluid position-relative d-flex p-0"
         id="adminSection"
       >
         <AdminSidebar />
-        <div class="content">
+        <div className="content">
           <AdminNav />
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">
@@ -331,7 +331,7 @@ function PurchasedClients() {
                               {rowData.purchaseStatus == "valid" ? (
                                 <button
                                   type="button"
-                                  class="btn btn-sm btn-outline-danger"
+                                  className="btn btn-sm btn-outline-danger"
                                   onClick={() => cancelSubscription(rowData.id)}
                                 >
                                   CANCEL

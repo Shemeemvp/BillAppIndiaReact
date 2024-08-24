@@ -7,11 +7,12 @@ import "./styles/AddItems.css";
 import Swal from "sweetalert2";
 import axios from "axios";
 import config from "../../functions/config";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
-function AddItems() {
+function EditItem() {
   const ID = Cookies.get("user_id");
+  const { itemId } = useParams();
   const navigate = useNavigate();
 
   function activeLink() {
@@ -97,6 +98,41 @@ function AddItems() {
     }
   }
 
+  const fetchItemDetails = () => {
+    var dt = {
+      itemId: itemId,
+    };
+    axios
+      .get(`${config.base_url}/get_item_details/`, { params: dt })
+      .then((res) => {
+        if (res.data.status) {
+          console.log(res);
+          let itm = res.data.firstItem;
+          setName(itm.name);
+          setUnit(itm.unit);
+          setHsn(itm.hsn);
+          if (itm.tax == "Taxable") {
+            setTaxRef(true);
+          } else {
+            setTaxRef(false);
+          }
+          setInterStateTax(itm.igst);
+          setIntraStateTax(itm.gst);
+          setPurchasePrice(itm.purchase_price);
+          setSalesPrice(itm.sale_price);
+          setStock(res.data.op_stock);
+          setPrevBarcode(itm.barcode);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    fetchItemDetails();
+  }, []);
+
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
   const [hsn, setHsn] = useState("");
@@ -107,6 +143,7 @@ function AddItems() {
   const [salesPrice, setSalesPrice] = useState(0);
   const [stock, setStock] = useState(0);
   const [barcode, setBarcode] = useState("");
+  const [prevBarcode, setPrevBarcode] = useState("");
 
   function openBarcode() {
     document.getElementById("barcode_div").style.display = "flex";
@@ -120,32 +157,57 @@ function AddItems() {
     document.getElementById("barcode").value = "";
   }
 
-  function checkBarcode(event) {
-    var bc = event.target.value.toUpperCase();
-    if (event.keyCode == 13) {
-      event.preventDefault();
-    }
-    if (bc != "") {
+  async function checkBarcode() {
+    var bc = barcode.toUpperCase();
+    if (bc !== "" && bc !== prevBarcode) {
       var data = {
         Id: ID,
         barcode: bc,
       };
-      axios
-        .get(`${config.base_url}/check_item_barcode/`, { params: data })
-        .then((res) => {
-          if (!res.data.status) {
-            alert(res.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
+
+      try {
+        const res = await axios.get(`${config.base_url}/check_item_barcode/`, {
+          params: data,
         });
+        if (!res.data.status) {
+          alert(res.data.message);
+          return false;
+        }
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function handleBarcode(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      var bc = event.target.value.toUpperCase();
+      if (bc !== "" && bc !== prevBarcode) {
+        var data = {
+          Id: ID,
+          barcode: bc,
+        };
+        axios
+          .get(`${config.base_url}/check_item_barcode/`, { params: data })
+          .then((res) => {
+            if (!res.data.status) {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     }
   }
 
   function checkBarcodeInput(event) {
     var bc = event.target.value.toUpperCase();
-    if (bc != "") {
+    if (bc != "" && bc != prevBarcode) {
       var data = {
         Id: ID,
         barcode: bc,
@@ -182,13 +244,12 @@ function AddItems() {
     return true;
   }
 
-  const [action, setAction] = useState("new");
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     var dt = {
       Id: ID,
+      item_id: itemId,
       name: name,
       unit: unit,
       hsn: hsn,
@@ -202,46 +263,33 @@ function AddItems() {
     };
 
     let valid = validateForm();
-    if (valid) {
-      axios
-        .post(`${config.base_url}/create_new_item/`, dt)
-        .then((res) => {
-          if (res.data.status) {
-            Toast.fire({
-              icon: "success",
-              title: "Item Created",
-            });
-            if (action == "save") {
-              navigate("/items");
-            } else {
-              setName("");
-              setUnit("");
-              setHsn("");
-              setInterStateTax("");
-              setIntraStateTax("");
-              setBarcode("");
-              setTaxRef(true);
-              setPurchasePrice(0);
-              setSalesPrice(0);
-              setStock(0);
-            }
-          }
-          if (!res.data.status && res.data.message != "") {
-            Swal.fire({
-              icon: "error",
-              title: `${res.data.message}`,
-            });
-          }
-        })
-        .catch((err) => {
-          console.log("ERROR=", err);
-          if (!err.response.data.status) {
-            Swal.fire({
-              icon: "error",
-              title: `${err.response.data.message}`,
-            });
-          }
-        });
+    let validBarcode = await checkBarcode();
+
+    if (valid && validBarcode) {
+      try {
+        const res = await axios.put(`${config.base_url}/update_item/`, dt);
+        console.log("PUT RES=", res);
+        if (res.data.status) {
+          Toast.fire({
+            icon: "success",
+            title: "Item Updated",
+          });
+          navigate(`/view_item/${itemId}/`);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: `${res.data.message}`,
+          });
+        }
+      } catch (err) {
+        console.log("ERROR=", err);
+        if (err.response && !err.response.data.status) {
+          Swal.fire({
+            icon: "error",
+            title: `${err.response.data.message}`,
+          });
+        }
+      }
     }
   };
 
@@ -278,7 +326,7 @@ function AddItems() {
                       <span
                         className="d-flex justify-content-end p-2"
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate("/items")}
+                        onClick={() => navigate(`/view_item/${itemId}/`)}
                       >
                         <i className="fa-solid fa-xmark text-dark fs-5" />
                       </span>
@@ -289,7 +337,9 @@ function AddItems() {
                         <div className="row no-gutters">
                           <div className="col-md-12 mt-4 mb-4">
                             <center>
-                              <h4 className="card-title text-dark">ADD ITEM</h4>
+                              <h4 className="card-title text-dark">
+                                EDIT ITEM
+                              </h4>
                             </center>
                           </div>
                         </div>
@@ -397,6 +447,7 @@ function AddItems() {
                                     onChange={(e) =>
                                       setTaxRef(!e.target.checked)
                                     }
+                                    checked={!taxRef}
                                     id="tax_ref"
                                   />
                                   <span className="slider round" />
@@ -523,7 +574,7 @@ function AddItems() {
                               onClick={openBarcode}
                               title="ADD BARCODE"
                             >
-                              ADD <i className="fa fa-barcode" />
+                              UPDATE <i className="fa fa-barcode" />
                             </button>
                             <div
                               className="align-items-center"
@@ -538,8 +589,7 @@ function AddItems() {
                                 className="form-control text-uppercase"
                                 value={barcode}
                                 onChange={(e) => setBarcode(e.target.value)}
-                                onKeyDown={checkBarcode}
-                                onBlur={checkBarcodeInput}
+                                onKeyDown={handleBarcode}
                               />
                               <i
                                 className="fas fa-close ms-1"
@@ -550,27 +600,16 @@ function AddItems() {
                           </div>
                         </div>
                         <div className="row mt-5 mb-5">
-                          <div className="col-md-3" />
-                          <div className="col-md-3">
+                          <div className="col-md-4" />
+                          <div className="col-md-4">
                             <button
                               className="submit_btn w-100 text-uppercase"
                               type="submit"
-                              name="next_item"
-                              onClick={() => setAction("new")}
-                            >
-                              Save &amp; Next
-                            </button>
-                          </div>
-                          <div className="col-md-3">
-                            <button
-                              className="submit_btn w-100 text-uppercase"
-                              type="submit"
-                              onClick={() => setAction("save")}
                             >
                               Save
                             </button>
                           </div>
-                          <div className="col-md-3" />
+                          <div className="col-md-4" />
                         </div>
                       </form>
                     </div>
@@ -660,4 +699,4 @@ function AddItems() {
   );
 }
 
-export default AddItems;
+export default EditItem;

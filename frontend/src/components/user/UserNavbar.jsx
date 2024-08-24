@@ -98,29 +98,29 @@ function UserNavbar() {
               <span className="d-none d-lg-inline-flex">Notification</span>
             </a>
             <div className="notification-dropdown dropdown-menu dropdown-menu-end bg-dark border-0 rounded-0 rounded-bottom m-0">
-              <a href="#" class="dropdown-item">
+              <a href="#" className="dropdown-item">
                 {days == 0 ? (
-                  <h6 class="fw-normal mb-0">
+                  <h6 className="fw-normal mb-0">
                     Your Trial Period expires Today..
                   </h6>
                 ) : (
-                  <h6 class="fw-normal mb-0">
+                  <h6 className="fw-normal mb-0">
                     Your Trial Period expires in {"days"} days..
                   </h6>
                 )}
                 {!subscribe ? (
-                  <div class="d-flex px-1">
+                  <div className="d-flex px-1">
                     <small>Want to Purchase.?</small>
-                    <div class="d-flex justify-content-end align-items-center">
+                    <div className="d-flex justify-content-end align-items-center">
                       <a
                         href="{% url 'changeTrialStatus' 'yes' %}"
-                        class="text-decoration-none fw-bolder text-success"
+                        className="text-decoration-none fw-bolder text-success"
                       >
                         Yes
                       </a>
                       <a
                         href="{% url 'changeTrialStatus' 'no' %}"
-                        class="text-decoration-none fw-bolder text-danger ms-3 me-3"
+                        className="text-decoration-none fw-bolder text-danger ms-3 me-3"
                       >
                         Cancel
                       </a>

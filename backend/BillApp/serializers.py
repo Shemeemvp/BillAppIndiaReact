@@ -36,3 +36,8 @@ class UnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item_units
         fields = '__all__'
+
+class ItemTransSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item_transactions
+        fields = '__all__'

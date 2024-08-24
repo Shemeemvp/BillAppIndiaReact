@@ -239,11 +239,11 @@ function DemoClients() {
   return (
     <>
       <div
-        class="container-fluid position-relative d-flex p-0"
+        className="container-fluid position-relative d-flex p-0"
         id="adminSection"
       >
         <AdminSidebar />
-        <div class="content">
+        <div className="content">
           <AdminNav />
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">

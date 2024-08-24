@@ -597,7 +597,7 @@ def createNewItem(request):
         bc = request.data["barcode"]
         if bc != "":
             bc = bc.upper()
-        if Items.objects.filter(cid=cmp, barcode=bc).exists():
+        if bc != "" and Items.objects.filter(cid=cmp, barcode=bc).exists():
             return Response(
                 {"status": False, "message": "Barcode already exists, try another.!"},
                 status=status.HTTP_226_IM_USED,
@@ -620,6 +620,289 @@ def createNewItem(request):
                 quantity=item.stock,
             )
             transaction.save()
+
+            return Response(
+                {"status": True, "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_200_OK,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getItems(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        itms = Items.objects.filter(cid=cmp)
+        iData = Items.objects.filter(cid=cmp).first()
+        trans = Item_transactions.objects.filter(cid=cmp, item=iData).order_by("-id")
+
+        serializer = ItemSerializer(itms, many=True)
+        itemSerializer = ItemSerializer(iData)
+        trnsSerializer = ItemTransSerializer(trans, many=True)
+        return Response(
+            {
+                "status": True,
+                "items": serializer.data,
+                "firstItem": itemSerializer.data,
+                "transactions": trnsSerializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getItemDetails(request):
+    try:
+        iData = Items.objects.get(id=request.GET["itemId"])
+        trans = Item_transactions.objects.filter(item=iData).order_by("-id")
+
+        trns = Item_transactions.objects.get(item=iData, type="Opening Stock")
+        op_stock = trns.quantity
+
+        itemSerializer = ItemSerializer(iData)
+        trnsSerializer = ItemTransSerializer(trans, many=True)
+        return Response(
+            {
+                "status": True,
+                "firstItem": itemSerializer.data,
+                "transactions": trnsSerializer.data,
+                "op_stock": op_stock,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def updateStock(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        item = Items.objects.get(cid=cmp, id=request.data["item_id"])
+        adj = request.data["adjust"]
+        if adj:
+            item.stock += int(request.data["stock"])
+            item.save()
+
+            trns = Item_transactions(
+                cid=cmp,
+                item=item,
+                type="Add Stock",
+                date=request.data["date"],
+                quantity=request.data["stock"],
+            )
+            trns.save()
+        else:
+            item.stock -= int(request.data["stock"])
+            item.save()
+
+            trns = Item_transactions(
+                cid=cmp,
+                item=item,
+                type="Reduce Stock",
+                date=request.data["date"],
+                quantity=request.data["stock"],
+            )
+            trns.save()
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getTransactionDetails(request, id):
+    try:
+        trans = Item_transactions.objects.get(id=id)
+        trnsSerializer = ItemTransSerializer(trans)
+        return Response(
+            {
+                "status": True,
+                "transaction": trnsSerializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deleteTransaction(request, id):
+    try:
+        trns = Item_transactions.objects.get(id=id)
+        item = Items.objects.get(id=trns.item.id)
+        if trns.type == "Add Stock":
+            item.stock -= trns.quantity
+        elif trns.type == "Reduce Stock":
+            item.stock += trns.quantity
+
+        item.save()
+        trns.delete()
+        return Response(
+            {
+                "status": True,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def updateTransaction(request):
+    try:
+        trns = Item_transactions.objects.get(id=request.data["trans_id"])
+        item = Items.objects.get(id=trns.item.id)
+        crQty = trns.quantity
+        chQty = int(request.data["quantity"])
+        diff = abs(crQty - chQty)
+
+        type = request.data["type"]
+        if str(type).lower() == "reduce stock" and chQty > crQty:
+            item.stock -= diff
+        elif str(type).lower() == "reduce stock" and chQty < crQty:
+            item.stock += diff
+        elif str(type).lower() == "add stock" and chQty > crQty:
+            item.stock += diff
+        elif str(type).lower() == "add stock" and chQty < crQty:
+            item.stock -= diff
+
+        if str(type).lower() == "opening stock" and chQty > crQty:
+            item.stock += diff
+        elif str(type).lower() == "opening stock" and chQty < crQty:
+            item.stock -= diff
+
+        trns.quantity = request.data["quantity"]
+        trns.date = request.data["date"]
+        trns.save()
+        item.save()
+
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deleteItem(request, id):
+    try:
+        item = Items.objects.get(id=id)
+
+        if (
+            Sales_items.objects.filter(item=item).exists()
+            or Purchase_items.objects.filter(item=item).exists()
+        ):
+            return Response(
+                {
+                    "status": False,
+                    "message": f"Item cannot be deleted because of Sales or Purchase transactions exists for `{item.name}`.",
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            item.delete()
+            return Response(
+                {
+                    "status": True,
+                },
+                status=status.HTTP_200_OK,
+            )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("PUT",))
+def updateItem(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+        request.data["cid"] = cmp.cmp_id
+
+        item = Items.objects.get(id=request.data["item_id"])
+        trns = (
+            Item_transactions.objects.filter(item=item.id)
+            .filter(type="Opening Stock")
+            .first()
+        )
+        crQty = trns.quantity
+        chQty = int(request.data["stock"])
+        diff = abs(crQty - chQty)
+
+        if diff != 0 and chQty > crQty:
+            request.data["stock"] = item.stock + diff
+        elif diff != 0 and chQty < crQty:
+            request.data["stock"] = item.stock - diff
+        else:
+            request.data["stock"] = item.stock
+
+        bc = request.data["barcode"]
+        if bc != "":
+            bc = bc.upper()
+        if (
+            item.barcode != bc
+            and bc != ""
+            and Items.objects.filter(cid=cmp, barcode=bc).exists()
+        ):
+            return Response(
+                {"status": False, "message": "Barcode already exists, try another.!"},
+                status=status.HTTP_226_IM_USED,
+            )
+        tax = request.data["tax_reference"]
+        request.data["tax"] = "Taxable" if tax else "Non-taxable"
+        request.data["gst"] = "GST0[0%]" if not tax else request.data["gst"]
+        request.data["igst"] = "IGST0[0%]" if not tax else request.data["igst"]
+
+        serializer = ItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+
+            trns.quantity = chQty
+            trns.save()
 
             return Response(
                 {"status": True, "data": serializer.data},

@@ -10,12 +10,12 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import * as XLSX from "xlsx";
 import config from "../../functions/config";
-import { Link, useNavigate } from "react-router-dom";
-import { refresh } from "aos";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-function Items() {
+function ViewItem() {
   const navigate = useNavigate();
   const ID = Cookies.get("user_id");
+  const { itemId } = useParams();
 
   function activeLink() {
     var nav_links = document.querySelectorAll(".nav-item.nav-link");
@@ -33,6 +33,11 @@ function Items() {
     activeLink();
   }, []);
 
+  const handleRowClick = (id) => {
+    window.history.pushState({}, "", `/view_item/${id}/`);
+    fetchItemDetails(id);
+  };
+
   const [items, setItems] = useState([]);
   const [item, setItem] = useState({});
   const [transactions, setTransactions] = useState([]);
@@ -43,14 +48,34 @@ function Items() {
       .then((res) => {
         if (res.data.status) {
           let itms = res.data.items;
-          let trns = res.data.transactions;
-          let firstItem = res.data.firstItem;
-          setItem(firstItem);
           setItems([]);
           itms.map((i) => {
             setItems((prevState) => [...prevState, i]);
           });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItemDetails = (id) => {
+    var dt = {
+      itemId: id,
+    };
+    axios
+      .get(`${config.base_url}/get_item_details/`, { params: dt })
+      .then((res) => {
+        if (res.data.status) {
+          setItem({});
           setTransactions([]);
+          let trns = res.data.transactions;
+          let firstItem = res.data.firstItem;
+          setItem(firstItem);
           trns.map((t) => {
             setTransactions((prevState) => [...prevState, t]);
           });
@@ -62,7 +87,7 @@ function Items() {
   };
 
   useEffect(() => {
-    fetchItems();
+    fetchItemDetails(itemId);
   }, []);
 
   const [stockAdjust, setStockAdjust] = useState(true);
@@ -148,7 +173,7 @@ function Items() {
               icon: "success",
               title: "Stock Updated",
             });
-            refreshItemDetails(item.id);
+            fetchItemDetails(item.id);
             document.getElementById("stockAdjModalClose").click();
           }
         })
@@ -163,29 +188,6 @@ function Items() {
         });
     }
   }
-
-  const refreshItemDetails = (id) => {
-    var dt = {
-      itemId: id,
-    };
-    axios
-      .get(`${config.base_url}/get_item_details/`, { params: dt })
-      .then((res) => {
-        if (res.data.status) {
-          setItem({});
-          setTransactions([]);
-          let trns = res.data.transactions;
-          let firstItem = res.data.firstItem;
-          setItem(firstItem);
-          trns.map((t) => {
-            setTransactions((prevState) => [...prevState, t]);
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
   function searchItemsList(e) {
     var rows = document.querySelectorAll(".itemslist tbody tr");
@@ -297,7 +299,7 @@ function Items() {
                 icon: "success",
                 title: "Transaction removed.",
               });
-              refreshItemDetails(item.id);
+              fetchItemDetails(item.id);
             }
           })
           .catch((err) => {
@@ -444,10 +446,8 @@ function Items() {
                                 items.map((i) => (
                                   <tr
                                     className="table_rows"
+                                    onClick={() => handleRowClick(i.id)}
                                     style={{ cursor: "pointer" }}
-                                    onClick={() =>
-                                      navigate(`/view_item/${i.id}/`)
-                                    }
                                   >
                                     <td className="itm_name">{i.name}</td>
                                     <td className="itm_id" hidden>
@@ -812,4 +812,4 @@ function Items() {
   );
 }
 
-export default Items;
+export default ViewItem;
