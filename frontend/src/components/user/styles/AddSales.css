@@ -1,0 +1,107 @@
+
+.userAddSales .switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.userAddSales .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.userAddSales .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.userAddSales .slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.userAddSales input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+  height: 22px;
+  width: 22px;
+  left: 1px;
+  bottom: 3px;
+}
+.userAddSales input:checked + .slider {
+  background-color: #2196f3;
+}
+
+/* Rounded sliders */
+.userAddSales .slider.round {
+  border-radius: 32px;
+  background-color: #ccc;
+}
+
+.userAddSales .slider.round:before {
+  border-radius: 50%;
+}
+.userAddSales .submit_btn,
+.userAddSales .submitunit_btn {
+  background: #c6aa589e;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.userAddSales .submit_btn:hover,
+.userAddSales .submitunit_btn:hover {
+  background: #c6aa58;
+}
+.userAddSales input:read-only {
+  background: #fff !important;
+}
+.userAddSales .amount_summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 1rem;
+}
+.userAddSales .amt_head_label label {
+  font-size: 1rem;
+  /* font-weight: 500; */
+}
+
+.userAddSales .input-with-icon {
+  position: relative;
+}
+
+.userAddSales .input-with-icon i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+}
+
+.userAddSales .input-with-icon input {
+  padding-left: 30px;
+}
+
+.userAddSales #barcode:focus,
+.userAddSales #barcode2:focus {
+  box-shadow: none;
+  border-color: #18bb16;
+}

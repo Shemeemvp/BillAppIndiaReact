@@ -918,3 +918,47 @@ def updateItem(request):
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+# Sales
+@api_view(("GET",))
+def fetchSalesData(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        items = Items.objects.filter(cid=cmp)
+
+        itemSerializer = ItemSerializer(items, many=True)
+
+        # Fetching last bill and assigning upcoming bill no as current + 1
+        # Also check for if any bill is deleted and bill no is continuos w r t the deleted bill
+        latest_bill = Sales.objects.filter(cid=cmp).order_by("-bill_no").first()
+
+        if latest_bill:
+            last_number = int(latest_bill.bill_number)
+            new_number = last_number + 1
+        else:
+            new_number = 1
+
+        if DeletedSales.objects.filter(cid=cmp).exists():
+            deleted = DeletedSales.objects.get(cid=cmp)
+
+            if deleted:
+                while int(deleted.bill_number) >= new_number:
+                    new_number += 1
+
+        return Response(
+            {
+                "status": True,
+                "items": itemSerializer.data,
+                "billNo": new_number,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

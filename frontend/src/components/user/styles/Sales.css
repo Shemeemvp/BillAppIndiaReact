@@ -1,0 +1,41 @@
+.userSales .btn:focus {
+  box-shadow: none;
+}
+.userSales .add_newsale_btn {
+  border: 1px solid lightgoldenrodyellow;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+  background: #c6aa58d9;
+  color: white;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+.userSales .add_newsale_btn:hover {
+  background: #b19542d9;
+}
+.userSales #search_box {
+  width: 68%;
+}
+.userSales .add_new_btn,
+.userSales .fltr_btn,
+.userSales .print_btn {
+  background: #0d533ae6;
+  font-weight: 600;
+  color: white;
+}
+.userSales .add_new_btn:hover,
+.userSales .fltr_btn:hover,
+.userSales .print_btn:hover {
+  background: #1d8d68;
+  color: white;
+}
+
+.userSales table tr {
+  cursor: pointer;
+}
+.userSales .table-responsive {
+  max-height: 65vh;
+}
+.userSales .table-responsive::-webkit-scrollbar {
+  display: none;
+}

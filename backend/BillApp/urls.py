@@ -24,7 +24,7 @@ urlpatterns = [
     path("user_details/<int:id>/", getSelfData),
     path("get_item_units/<int:id>/", getItemUnits),
     path("create_new_unit/", createNewUnit),
-    path('check_item_barcode/', checkItemBarcode),
+    path("check_item_barcode/", checkItemBarcode),
     path("create_new_item/", createNewItem),
     path("update_stock/", updateStock),
     path("get_items/<int:id>/", getItems),
@@ -34,5 +34,7 @@ urlpatterns = [
     path("update_transaction/", updateTransaction),
     path("delete_item/<int:id>/", deleteItem),
     path("update_item/", updateItem),
+    # Sales
+    path("fetch_sales_data/<int:id>/", fetchSalesData),
     # path('get_barcode_details',views.getBarcodeDetails, name='getBarcodeDetails'),
 ]
