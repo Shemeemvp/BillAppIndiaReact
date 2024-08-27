@@ -1,0 +1,152 @@
+.userViewSale .btn:focus {
+  box-shadow: none;
+}
+.userViewSale .add_newpurchase_btn {
+  border: 1px solid lightgoldenrodyellow;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+  background: #c6aa58d9;
+  color: white;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+.userViewSale .add_newpurchase_btn:hover {
+  background: #b19542d9;
+}
+.userViewSale #search_box {
+  width: 68%;
+}
+.userViewSale .template_switch button {
+  background: darkkhaki;
+  color: white;
+}
+.userViewSale .add_new_btn,
+.userViewSale .fltr_btn,
+.userViewSale .tmplt_swtch,
+.userViewSale .action_btn,
+.userViewSale .switch_btn_active {
+  background: #0d533ae6 !important;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+}
+.userViewSale #template_btn {
+  background: #0d533ae6;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+}
+.userViewSale .add_new_btn:hover,
+.userViewSale .tmplt_swtch:hover,
+.userViewSale .action_btn:hover,
+.userViewSale .switch_btn_active:hover,
+.userViewSale .template_switch button:hover {
+  background: #1d8d68 !important;
+  color: white !important;
+}
+.userViewSale .sales_section {
+  background: #eae9c4;
+}
+
+.userViewSale #purchases_search_box {
+  width: 70%;
+}
+
+.userViewSale .bill_template_section {
+  padding: 1rem;
+  background: #ad9e72;
+  margin: 0.5rem;
+}
+.userViewSale table tr {
+  cursor: pointer !important;
+}
+.userViewSale .purchases_table td {
+  padding: 1.3rem 0.5rem;
+}
+
+/* SLIP VIEW STYLINGS */
+.userViewSale .slip h5 {
+  font-family: serif;
+}
+.userViewSale p {
+  font-size: 1.2em;
+}
+.userViewSale .address {
+  display: flex;
+  flex-direction: column;
+}
+.userViewSale .address p,
+.userViewSale .footer p {
+  font-size: 1rem;
+  margin: 0;
+}
+.userViewSale .slip-container {
+  width: 100mm;
+  margin: 2rem auto;
+  padding: 2rem;
+  box-shadow: rgba(60, 64, 67, 0.5) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.35) 0px 2px 6px 2px;
+}
+.userViewSale .divider {
+  margin: 1rem 0;
+  border-bottom: 3px dotted black;
+}
+.userViewSale .trns-id p,
+.userViewSale .datetime p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+.userViewSale .table-responsive {
+  max-height: 100vh;
+}
+.userViewSale .table-responsive::-webkit-scrollbar {
+  display: none;
+}
+
+.submitShareEmailBtn {
+  background: #c6aa589e;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.submitShareEmailBtn:hover {
+  background: #c6aa58;
+}
+
+.userViewSale .equal-length-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%; /* Make the container fill the height of the column */
+  /* margin-left: 2vh;
+    margin-right: 2vh; */
+}
+
+.userViewSale .equal-length-item {
+  flex: 1;
+  text-align: center;
+}
+
+@media print {
+  body {
+    visibility: hidden !important; /* hide everything in body when in print mode*/
+  }
+
+  .userViewSale #printslip {
+    margin-left: 2vh;
+    margin-right: 2vh;
+  }
+
+  .userViewSale .printContainer {
+    visibility: visible !important; /* Override the rule above to only show the printables*/
+    position: absolute;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: large;
+  }
+}

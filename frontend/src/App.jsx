@@ -16,6 +16,7 @@ import ViewItem from "./components/user/ViewItem";
 import EditItem from "./components/user/EditItem";
 import Sales from "./components/user/Sales";
 import AddSales from "./components/user/AddSales";
+import ViewSales from "./components/user/ViewSales";
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function App() {
             <Route path="/sales" element={<Sales />}></Route>
             <Route path="/add_sales" element={<AddSales />}></Route>
             {/* <Route path="/edit_item/:itemId/" element={<EditItem />}></Route> */}
-            {/* <Route path="/view_item/:itemId/" element={<ViewItem />}></Route> */}
+            <Route path="/view_sales_bill/:saleId/" element={<ViewSales />}></Route>
             
           </Route>
         </Routes>  

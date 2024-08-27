@@ -41,3 +41,13 @@ class ItemTransSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item_transactions
         fields = '__all__'
+
+class SalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sales
+        fields = '__all__'
+
+class SalesItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sales_items
+        fields = '__all__'

@@ -22,6 +22,7 @@ urlpatterns = [
     path("cancel_subscription/", cancelSubscription),
     # User
     path("user_details/<int:id>/", getSelfData),
+    # Items
     path("get_item_units/<int:id>/", getItemUnits),
     path("create_new_unit/", createNewUnit),
     path("check_item_barcode/", checkItemBarcode),
@@ -36,5 +37,11 @@ urlpatterns = [
     path("update_item/", updateItem),
     # Sales
     path("fetch_sales_data/<int:id>/", fetchSalesData),
-    # path('get_barcode_details',views.getBarcodeDetails, name='getBarcodeDetails'),
+    path('get_item_data/', getItemData),
+    path('get_barcode_details/',getBarcodeDetails),
+    path('create_sales/', createSales),
+    path("get_sales_bills/<int:id>/", getSalesBills),
+    path("get_sales_bills_filtered/", getSalesBillsFiltered),
+    path("get_sale_bill_details/", getSalesBillDetails),
+    path("delete_sales_bill/<int:id>/", deleteSalesBill),
 ]

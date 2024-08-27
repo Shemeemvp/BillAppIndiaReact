@@ -29,7 +29,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, status
 from .serializers import *
-
+from copy import deepcopy
 
 # Create your views here.
 
@@ -953,6 +953,270 @@ def fetchSalesData(request, id):
                 "status": True,
                 "items": itemSerializer.data,
                 "billNo": new_number,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getItemData(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+        id = request.GET["item"]
+
+        item = Items.objects.get(id=id)
+        data = {
+            "hsn": item.hsn,
+            "pur_rate": item.purchase_price,
+            "sale_rate": item.sale_price,
+            "tax": True if item.tax == "Taxable" else False,
+            "gst": item.gst,
+            "igst": item.igst,
+        }
+        return Response({"status": True, "itemData": data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getBarcodeDetails(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+        bc = request.GET["barcode"]
+
+        if Items.objects.filter(cid=cmp, barcode=bc).exists():
+            item = Items.objects.get(cid=cmp, barcode=bc)
+            hsn = item.hsn
+            pur_rate = item.purchase_price
+            sale_rate = item.sale_price
+            tax = True if item.tax == "Taxable" else False
+            gst = item.gst
+            igst = item.igst
+            data = {
+                "id": item.id,
+                "name": item.name,
+                "hsn": hsn,
+                "pur_rate": pur_rate,
+                "sale_rate": sale_rate,
+                "tax": tax,
+                "gst": gst,
+                "igst": igst,
+            }
+            return Response(
+                {
+                    "status": True,
+                    "itemData": data,
+                }
+            )
+        else:
+            return Response({"status": False, "message": "No data found.!"})
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def createSales(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        mutable_data = deepcopy(request.data)
+        mutable_data["cid"] = cmp.cmp_id
+
+        serializer = SalesSerializer(data=mutable_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            salesItems = json.loads(request.data["salesItems"])
+            sale = Sales.objects.get(bill_no=serializer.data["bill_no"])
+
+            for ele in salesItems:
+                itm = Items.objects.get(id=int(ele.get("item")))
+                qty = int(ele.get("quantity"))
+                hsn = ele.get("hsn")
+                price = ele.get("price")
+                tax = (
+                    ele.get("taxGst")
+                    if request.data["state_of_supply"] == "State"
+                    else ele.get("taxIgst")
+                )
+
+                Sales_items.objects.create(
+                    cid=cmp,
+                    sid=sale,
+                    item=itm,
+                    name=itm.name,
+                    hsn=hsn,
+                    quantity=qty,
+                    rate=float(price),
+                    tax=tax,
+                    total=float(ele.get("total")),
+                )
+
+            # Add sales details in items transactions
+            for itm in salesItems:
+                tItem = Items.objects.get(id=itm.get("item"), cid=cmp)
+                Item_transactions.objects.create(
+                    cid=cmp,
+                    item=tItem,
+                    type="Sale",
+                    date=sale.date,
+                    quantity=itm.get("quantity"),
+                    bill_number=sale.bill_number,
+                )
+                tItem.stock -= int(itm.get("quantity"))
+                tItem.save()
+
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getSalesBills(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        sales = Sales.objects.filter(cid=cmp)
+
+        serializer = SalesSerializer(sales, many=True)
+        return Response(
+            {
+                "status": True,
+                "sales": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getSalesBillsFiltered(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        start = request.GET["start"]
+        end = request.GET["end"]
+
+        sales = Sales.objects.filter(cid=cmp, date__range=[start, end])
+
+        serializer = SalesSerializer(sales, many=True)
+        return Response(
+            {
+                "status": True,
+                "sales": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getSalesBillDetails(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        sale = Sales.objects.get(bill_no=request.GET["salesId"])
+        items = Sales_items.objects.filter(sid=sale)
+
+        saleSerializer = SalesSerializer(sale)
+        saleItemsSerializer = SalesItemsSerializer(items, many=True)
+        return Response(
+            {
+                "status": True,
+                "bill": saleSerializer.data,
+                "items": saleItemsSerializer.data,
+                "cmp": {
+                    "company_name": cmp.company_name,
+                    "address": cmp.address,
+                    "email": usr.email,
+                    "state": cmp.state,
+                    "country": cmp.country,
+                    "phone_number": cmp.phone_number,
+                    "gst_number": cmp.gst_number,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deleteSalesBill(request, id):
+    try:
+        bill = Sales.objects.get(bill_no=id)
+        cmp = bill.cid
+        items = Sales_items.objects.filter(sid=bill)
+        for i in items:
+            itm = Items.objects.get(id=i.item.id)
+            itm.stock += i.quantity
+            itm.save()
+            Item_transactions.objects.filter(
+                bill_number=bill.bill_number, type="Sale", item=itm
+            ).delete()
+        Sales_items.objects.filter(sid=bill).delete()
+
+        # Storing bill number to deleted table
+        # if entry exists and lesser than the current, update and save => Only one entry per company
+
+        if DeletedSales.objects.filter(cid=cmp).exists():
+            deleted = DeletedSales.objects.get(cid=cmp)
+            if deleted:
+                if int(bill.bill_number) > int(deleted.bill_number):
+                    deleted.bill_number = bill.bill_number
+                    deleted.save()
+        else:
+            deleted = DeletedSales(cid=cmp, bill_number=bill.bill_number)
+            deleted.save()
+
+        bill.delete()
+        return Response(
+            {
+                "status": True,
             },
             status=status.HTTP_200_OK,
         )

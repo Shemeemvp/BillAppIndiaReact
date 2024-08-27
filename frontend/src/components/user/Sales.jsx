@@ -33,6 +33,27 @@ function Sales() {
 
   const [sales, setSales] = useState([]);
 
+  const fetchSales = () => {
+    axios
+      .get(`${config.base_url}/get_sales_bills/${ID}/`)
+      .then((res) => {
+        if (res.data.status) {
+          let sls = res.data.sales;
+          setSales([]);
+          sls.map((i) => {
+            setSales((prevState) => [...prevState, i]);
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
   function searchSalesTable(e) {
     var rows = document.querySelectorAll(".sales_table tbody tr");
     var val = e.target.value.trim().replace(/ +/g, " ").toLowerCase();
@@ -92,6 +113,41 @@ function Sales() {
       printWindow.close();
     });
   }
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleFilterSubmit = (e) => {
+    e.preventDefault();
+    var sdate = new Date(startDate);
+    var edate = new Date(endDate);
+
+    if (edate.valueOf() < sdate.valueOf()) {
+      alert("End date should be greater than start date.!");
+    } else {
+      var filterValues = {
+        Id: ID,
+        start: startDate,
+        end: endDate,
+      };
+      axios
+        .get(`${config.base_url}/get_sales_bills_filtered/`, {
+          params: filterValues,
+        })
+        .then((res) => {
+          if (res.data.status) {
+            let sls = res.data.sales;
+            setSales([]);
+            sls.map((i) => {
+              setSales((prevState) => [...prevState, i]);
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
 
   const Toast = Swal.mixin({
     toast: true,
@@ -157,7 +213,7 @@ function Sales() {
                               <h4>All Sales</h4>
                             </div>
                             <form
-                              action="{% url 'salesInBetween' %}"
+                              onSubmit={handleFilterSubmit}
                               className="date-filter d-flex align-items-center justify-content-between"
                             >
                               <div className="form-group">
@@ -166,7 +222,8 @@ function Sales() {
                                   className="form-control form-control-sm"
                                   name="start_date"
                                   id="from-date"
-                                  defaultValue="{{start}}"
+                                  value={startDate}
+                                  onChange={(e) => setStartDate(e.target.value)}
                                   required
                                 />
                               </div>
@@ -179,7 +236,8 @@ function Sales() {
                                   className="form-control form-control-sm"
                                   name="end_date"
                                   id="to-date"
-                                  defaultValue="{{end}}"
+                                  value={endDate}
+                                  onChange={(e) => setEndDate(e.target.value)}
                                   required
                                 />
                               </div>
@@ -295,7 +353,7 @@ function Sales() {
         <div>
           <h4>ALL SALES</h4>
         </div>
-        <table className="table table-bordered mt-2" id="sales_table_print">
+        <table className="custom-table mt-2" id="sales_table_print">
           <thead>
             <tr>
               <th scope="col" className="col-1">
