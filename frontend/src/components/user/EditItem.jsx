@@ -121,6 +121,7 @@ function EditItem() {
           setPurchasePrice(itm.purchase_price);
           setSalesPrice(itm.sale_price);
           setStock(res.data.op_stock);
+          setBarcode(itm.barcode);
           setPrevBarcode(itm.barcode);
         }
       })

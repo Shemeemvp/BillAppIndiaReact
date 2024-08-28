@@ -117,37 +117,46 @@ function Sales() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const handleFilterSubmit = (e) => {
-    e.preventDefault();
-    var sdate = new Date(startDate);
-    var edate = new Date(endDate);
+  const filterTableRows = () => {
+    const fromDate = new Date(startDate);
+    const toDate = new Date(endDate);
+    toDate.setHours(23, 59, 59, 999);
 
-    if (edate.valueOf() < sdate.valueOf()) {
-      alert("End date should be greater than start date.!");
-    } else {
-      var filterValues = {
-        Id: ID,
-        start: startDate,
-        end: endDate,
-      };
-      axios
-        .get(`${config.base_url}/get_sales_bills_filtered/`, {
-          params: filterValues,
-        })
-        .then((res) => {
-          if (res.data.status) {
-            let sls = res.data.sales;
-            setSales([]);
-            sls.map((i) => {
-              setSales((prevState) => [...prevState, i]);
-            });
+    if (startDate != "" && endDate != "") {
+      if (fromDate.valueOf() > toDate.valueOf()) {
+        alert("End date should be greater than start date.!");
+      } else {
+        const rows = document.querySelectorAll(".sales_table tbody tr");
+        const rows2 = document.querySelectorAll(".print_sales_table tbody tr");
+
+        rows.forEach((row) => {
+          const dateCell = row.querySelector("td:nth-child(2)");
+          const rowDate = new Date(dateCell.textContent.trim());
+
+          if (rowDate >= fromDate && rowDate <= toDate) {
+            row.style.display = ""; // Show the row
+          } else {
+            row.style.display = "none"; // Hide the row
           }
-        })
-        .catch((err) => {
-          console.log(err);
         });
+
+        rows2.forEach((row) => {
+          const dateCell = row.querySelector("td:nth-child(2)");
+          const rowDate = new Date(dateCell.textContent.trim());
+
+          if (rowDate >= fromDate && rowDate <= toDate) {
+            row.style.display = ""; // Show the row
+          } else {
+            row.style.display = "none"; // Hide the row
+          }
+        });
+
+      }
+    } else {
+      alert("Enter both date inputs.!");
     }
   };
+
 
   const Toast = Swal.mixin({
     toast: true,
@@ -212,10 +221,7 @@ function Sales() {
                             <div className="sales_head">
                               <h4>All Sales</h4>
                             </div>
-                            <form
-                              onSubmit={handleFilterSubmit}
-                              className="date-filter d-flex align-items-center justify-content-between"
-                            >
+                            <form className="date-filter d-flex align-items-center justify-content-between">
                               <div className="form-group">
                                 <input
                                   type="date"
@@ -242,7 +248,8 @@ function Sales() {
                                 />
                               </div>
                               <button
-                                type="submit"
+                                type="button"
+                                onClick={filterTableRows}
                                 className="btn btn-sm fltr_btn ms-2"
                               >
                                 <i className="fa-solid fa-filter me-2" />

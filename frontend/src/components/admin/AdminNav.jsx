@@ -1,11 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import config from "../../functions/config";
 
 function AdminNav() {
   const navigate = useNavigate();
-  const [noti, setNoti] = useState(true);
+  const [noti, setNoti] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
+  const getAdminNotifications = () => {
+    axios
+      .get(`${config.base_url}/admin_notifications/`)
+      .then((res) => {
+        if (res.data.status) {
+          setNoti(true);
+          const details = res.data.renewals;
+          console.log(details);
+          setNotifications([]);
+          details.map((i) => {
+            setNotifications((prevState) => [...prevState, i]);
+          });
+        } else {
+          setNoti(false);
+          setNotifications([]);
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR==", err);
+      });
+  };
+
+  useEffect(() => {
+    getAdminNotifications();
+  }, []);
 
   function handleLogout() {
     Cookies.remove("user_id");
@@ -59,22 +87,23 @@ function AdminNav() {
               <span className="d-none d-lg-inline-flex">Notification</span>
             </a>
             <div className="notification-dropdown dropdown-menu dropdown-menu-end bg-dark border-0 rounded-0 rounded-bottom m-0">
-              {noti && notifications ? (
-                <>
-                  <a href="#" className="dropdown-item my-2">
-                    <h6 className="fw-normal mb-0">
-                      {"company_name"} wants to purchase..
-                    </h6>
-                  </a>
-                  <a
-                    href="{% url 'goDemoClients' %}"
-                    className="text-decoration-none text-success ms-3"
-                  >
-                    Continue
-                  </a>
-                  <hr className="dropdown-divider bg-white" />
-                </>
-              ) : null}
+              {noti &&
+                notifications.map((i) => (
+                  <>
+                    <a href="#" className="dropdown-item my-2">
+                      <h6 className="fw-normal mb-0">
+                        {i.company.company_name} wants to purchase..
+                      </h6>
+                    </a>
+                    <Link
+                      to="/demo_clients"
+                      className="text-decoration-none text-success ms-3"
+                    >
+                      Continue
+                    </Link>
+                    <hr className="dropdown-divider bg-white" />
+                  </>
+                ))}
             </div>
           </div>
         ) : null}
@@ -95,7 +124,11 @@ function AdminNav() {
             </span>
           </a>
           <div className="dropdown-menu dropdown-menu-end bg-dark border-0 rounded-0 rounded-bottom m-0">
-            <a onClick={handleLogout} className="dropdown-item" style={{cursor:"pointer"}}>
+            <a
+              onClick={handleLogout}
+              className="dropdown-item"
+              style={{ cursor: "pointer" }}
+            >
               Log Out
             </a>
           </div>

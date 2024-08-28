@@ -6,11 +6,11 @@ import Cookies from "js-cookie";
 
 function UserSidebar() {
   const navigate = useNavigate();
-  const [endDate, setEndDate] = useState("");
 
   const ID = Cookies.get("user_id");
   const [companyName, setCompanyName] = useState("");
   const [companyLogo, setCompanyLogo] = useState("");
+  const [endDate, setEndDate] = useState(null);
 
   const getUserDetails = () => {
     axios
@@ -24,6 +24,7 @@ function UserSidebar() {
           }
           setCompanyLogo(logImg);
           setCompanyName(details.name);
+          setEndDate(details.endDate);
         }
       })
       .catch((err) => {
@@ -118,7 +119,7 @@ function UserSidebar() {
               className="px-0"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate("/add_purchase");
+                navigate("/add_purchases");
               }}
             >
               <i className="fa-solid fa-plus bg-transparent float-end add-icon" />
@@ -149,7 +150,7 @@ function UserSidebar() {
             Purchase Reports
           </li>
         </div>
-        {endDate != "" ? (
+        {endDate != null ? (
           <div className="endDate my-3 px-2">
             <p className="text-white fw-bold mb-0">Subscription Ends by:</p>
             <span className="fs-5 fw-bolder" style={{ color: "#c6aa58" }}>

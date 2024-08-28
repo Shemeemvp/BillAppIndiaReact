@@ -82,11 +82,15 @@ main {
   transition: 0.5s;
   z-index: 999;
 }
+
+.sidebar::-webkit-scrollbar{
+  display: none;
+}
 /* .sidebar .navbar{
   background: var(--primary);
 } */
 
-.content {
+#userSection .content {
   margin-left: 250px;
   min-height: 100vh;
   background: white;
@@ -102,11 +106,11 @@ main {
     margin-left: -250px;
   }
 
-  .content {
+  #userSection .content {
     width: calc(100% - 250px);
   }
 
-  .content.open {
+  #userSection .content.open {
     width: 100%;
     margin-left: 0;
   }
@@ -121,7 +125,7 @@ main {
     margin-left: 0;
   }
 
-  .content {
+  #userSection .content {
     width: 100%;
     margin-left: 0;
   }
@@ -146,7 +150,7 @@ main {
   background: white;
   border-color: rgb(254, 232, 30);
 }
-.content .navbar .notification-dropdown .dropdown-item:hover {
+#userSection .content .navbar .notification-dropdown .dropdown-item:hover {
   background: #212529;
   color: white;
 }
@@ -203,20 +207,20 @@ main {
   border-color: rgb(254, 232, 30);
 }
 
-.content .navbar .navbar-nav .nav-link {
+#userSection .content .navbar .navbar-nav .nav-link {
   margin-left: 25px;
   padding: 12px 0;
   color: white;
   outline: none;
 }
 
-.content .navbar .navbar-nav .nav-link:hover,
-.content .navbar .navbar-nav .nav-link.active {
+#userSection .content .navbar .navbar-nav .nav-link:hover,
+#userSection .content .navbar .navbar-nav .nav-link.active {
   color: rgb(220, 219, 219);
 }
 
-.content .navbar .sidebar-toggler,
-.content .navbar .navbar-nav .nav-link i {
+#userSection .content .navbar .sidebar-toggler,
+#userSection .content .navbar .navbar-nav .nav-link i {
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -226,17 +230,17 @@ main {
   border-radius: 40px;
 }
 
-.content .navbar .dropdown-item {
+#userSection .content .navbar .dropdown-item {
   color: white;
 }
 
-.content .navbar .dropdown-item:hover,
-.content .navbar .dropdown-item.active {
+#userSection .content .navbar .dropdown-item:hover,
+#userSection .content .navbar .dropdown-item.active {
   background: white;
   color: black;
 }
 
-.content .navbar .dropdown-toggle::after {
+#userSection .content .navbar .dropdown-toggle::after {
   margin-left: 6px;
   vertical-align: middle;
   border: none;
@@ -246,12 +250,12 @@ main {
   transition: 0.5s;
 }
 
-.content .navbar .dropdown-toggle[aria-expanded="true"]::after {
+#userSection .content .navbar .dropdown-toggle[aria-expanded="true"]::after {
   transform: rotate(-180deg);
 }
 
 @media (max-width: 575.98px) {
-  .content .navbar .navbar-nav .nav-link {
+  #userSection .content .navbar .navbar-nav .nav-link {
     margin-left: 15px;
   }
 }

@@ -10,12 +10,12 @@ import axios from "axios";
 import config from "../../functions/config";
 import Cookies from "js-cookie";
 import Select from "react-select";
-import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { useNavigate, useParams } from "react-router-dom";
 
-function AddSales() {
+function EditSales() {
   const ID = Cookies.get("user_id");
   const navigate = useNavigate();
+  const { saleId } = useParams();
 
   function activeLink() {
     var nav_links = document.querySelectorAll(".nav-item.nav-link");
@@ -31,6 +31,96 @@ function AddSales() {
 
   useEffect(() => {
     activeLink();
+  }, []);
+
+  function checkTax(stateOfSupply) {
+    if (stateOfSupply == "State") {
+      document.querySelectorAll(".tax_ref").forEach(function (ele) {
+        ele.style.display = "none";
+      });
+      document.querySelectorAll(".tax-gst").forEach(function (ele) {
+        ele.style.display = "block";
+      });
+      document.getElementById("cgst_val").style.display = "grid";
+      document.getElementById("sgst_val").style.display = "grid";
+      document.getElementById("igst_val").style.display = "none";
+    } else {
+      document.querySelectorAll(".tax_ref").forEach(function (ele) {
+        ele.style.display = "none";
+      });
+      document.querySelectorAll(".tax-igst").forEach(function (ele) {
+        ele.style.display = "block";
+      });
+      document.getElementById("cgst_val").style.display = "none";
+      document.getElementById("sgst_val").style.display = "none";
+      document.getElementById("igst_val").style.display = "grid";
+    }
+  }
+
+  const fetchSalesBillDetails = () => {
+    var dt = {
+      salesId: saleId,
+      Id: ID,
+    };
+    axios
+      .get(`${config.base_url}/get_sale_bill_details/`, { params: dt })
+      .then((res) => {
+        if (res.data.status) {
+          var bill = res.data.bill;
+          var itms = res.data.items;
+          console.log(itms);
+
+          if (bill.party_name != "" && bill.party_name != null) {
+            setParty(true);
+          }
+
+          setPartyName(bill.party_name);
+          setContact(bill.phone_number);
+          setGstIn(bill.gstin);
+          setBillNo(bill.bill_number);
+          setDate(bill.date);
+          setStateOfSupply(bill.state_of_supply);
+          setSubTotal(bill.subtotal);
+          setIgst(bill.igst);
+          setCgst(bill.cgst);
+          setSgst(bill.sgst);
+          setTaxAmount(bill.tax);
+          setAdjustment(bill.adjustment);
+          setGrandTotal(bill.total_amount);
+          setSalesItems([]);
+          const saleItems = itms.map((i, index) => {
+            return {
+              id: index + 1,
+              item: i.item.id,
+              hsn: i.hsn,
+              quantity: i.quantity,
+              price: i.rate,
+              taxGst: i.item.gst,
+              taxIgst: i.item.igst,
+              total: i.total,
+              taxAmount: "",
+            };
+          });
+
+          setSalesItems(saleItems);
+          refreshIndexes(saleItems);
+
+          checkTax(bill.state_of_supply);
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR=", err);
+        if (!err.response.data.status) {
+          Swal.fire({
+            icon: "error",
+            title: `${err.response.data.message}`,
+          });
+        }
+      });
+  };
+
+  useEffect(() => {
+    fetchSalesBillDetails();
   }, []);
 
   var currentDate = new Date();
@@ -51,6 +141,20 @@ function AddSales() {
   const [taxAmount, setTaxAmount] = useState(0.0);
   const [adjustment, setAdjustment] = useState(0.0);
   const [grandTotal, setGrandTotal] = useState(0.0);
+
+  // const [salesItems, setSalesItems] = useState([
+  //   {
+  //     id: 1,
+  //     item: "",
+  //     hsn: "",
+  //     quantity: "",
+  //     price: "",
+  //     taxGst: "",
+  //     taxIgst: "",
+  //     total: "",
+  //     taxAmount: "",
+  //   },
+  // ]);
 
   const [barcode, setBarcode] = useState("");
   const [barcode2, setBarcode2] = useState("");
@@ -103,7 +207,6 @@ function AddSales() {
             value: item.id,
           }));
           setItems(newOptions);
-          setBillNo(res.data.billNo);
           focusBarcode();
         }
       })
@@ -662,8 +765,6 @@ function AddSales() {
     return val !== "" ? val : 0.0;
   }
 
-  const [action, setAction] = useState("new");
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -671,6 +772,7 @@ function AddSales() {
 
     const formData = new FormData();
     formData.append("Id", ID);
+    formData.append("saleId", saleId);
     formData.append("party", party);
     formData.append("party_name", partyName);
     formData.append("phone_number", contact);
@@ -689,33 +791,14 @@ function AddSales() {
 
     if (valid) {
       axios
-        .post(`${config.base_url}/create_sales/`, formData)
+        .put(`${config.base_url}/update_sales/`, formData)
         .then((res) => {
           if (res.data.status) {
             Toast.fire({
               icon: "success",
-              title: "Sales bill created.",
+              title: "Sales bill Updated.",
             });
-            if (action == "save") {
-              navigate("/sales");
-            } else {
-              setDate(formattedDate);
-              setBillNo("");
-              setParty(false);
-              setPartyName("");
-              setContact("");
-              setGstIn("");
-              setStateOfSupply("State");
-              setSubTotal(0.0);
-              setIgst(0.0);
-              setCgst(0.0);
-              setSgst(0.0);
-              setTaxAmount(0.0);
-              setAdjustment(0.0);
-              setGrandTotal(0.0);
-              setSalesItems([]);
-              fetchSalesData();
-            }
+            navigate(`/view_sales_bill/${saleId}/`);
           }
           if (!res.data.status && res.data.message != "") {
             Swal.fire({
@@ -769,7 +852,7 @@ function AddSales() {
                       <span
                         className="d-flex justify-content-end p-2"
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate("/sales")}
+                        onClick={() => navigate(`/view_sales_bill/${saleId}/`)}
                       >
                         <i className="fa-solid fa-xmark text-dark fs-5" />
                       </span>
@@ -781,7 +864,9 @@ function AddSales() {
                           <div className="col-md-2" />
                           <div className="col-md-8 mt-4 mb-4">
                             <center>
-                              <h4 className="card-title text-dark">ADD SALE</h4>
+                              <h4 className="card-title text-dark">
+                                EDIT SALE
+                              </h4>
                             </center>
                           </div>
                           <div className="col-md-2" />
@@ -832,6 +917,7 @@ function AddSales() {
                               type="checkbox"
                               name="party"
                               id="check_party"
+                              checked={party}
                               onChange={(e) => setParty(e.target.checked)}
                             />
                             <span className="slider round" />
@@ -1280,27 +1366,16 @@ function AddSales() {
                           </div>
                         </div>
                         <div className="row mt-5 mb-5">
-                          <div className="col-md-3" />
-                          <div className="col-md-3">
+                          <div className="col-md-4" />
+                          <div className="col-md-4">
                             <button
                               className="submit_btn w-100 text-uppercase"
                               type="submit"
-                              name="new_sale"
-                              onClick={() => setAction("new")}
-                            >
-                              Save &amp; New
-                            </button>
-                          </div>
-                          <div className="col-md-3">
-                            <button
-                              className="submit_btn w-100 text-uppercase"
-                              type="submit"
-                              onClick={() => setAction("save")}
                             >
                               Save
                             </button>
                           </div>
-                          <div className="col-md-3" />
+                          <div className="col-md-4" />
                         </div>
                       </form>
                     </div>
@@ -1316,4 +1391,4 @@ function AddSales() {
   );
 }
 
-export default AddSales;
+export default EditSales;

@@ -165,6 +165,22 @@ def userLogin(request):
             else:
                 refresh = RefreshToken.for_user(user)
                 log_status = ClientTrials.objects.get(user=user.id)
+
+                if log_status.purchase_status == 'null' and log_status.trial_status == True:
+                    exp_days = (log_status.end_date - date.today()).days
+                    if exp_days < 0:
+                        log_status.trial_status = False
+                        log_status.save()
+                        pass
+                elif log_status.purchase_status == 'valid':
+                    sub_exp_days = (log_status.purchase_end_date - date.today()).days
+                    if sub_exp_days < 0:
+                        log_status.purchase_status = 'expired'
+                        log_status.save()
+                        pass
+                else:
+                    pass
+
                 if log_status.purchase_status == "valid":
                     auth.login(request, user)
                     return Response(
@@ -286,6 +302,24 @@ def validateCompany(request):
 @api_view(("GET",))
 def fetchRegisteredClients(request):
     try:
+        # Checking clients Subscription and trial status, updates if expired.
+        trials = ClientTrials.objects.all()
+        for cStatus in trials:
+            if cStatus.purchase_status == 'null' and cStatus.trial_status == True:
+                exp_days = (cStatus.end_date - date.today()).days
+                if exp_days < 0:
+                    cStatus.trial_status = False
+                    cStatus.save()
+                    pass
+            elif cStatus.purchase_status == 'valid':
+                sub_exp_days = (cStatus.purchase_end_date - date.today()).days
+                if sub_exp_days < 0:
+                    cStatus.purchase_status = 'expired'
+                    cStatus.save()
+                    pass
+            else:
+                pass
+
         all_companies = Company.objects.all()
         clients = []
         for i in all_companies:
@@ -496,6 +530,25 @@ def cancelSubscription(request):
         )
 
 
+@api_view(("GET",))
+def getAdminNotifications(request):
+    try:
+        renewals = ClientTrials.objects.filter(subscribe_status="yes")
+        serializer = TrialSerializer(renewals, many=True)
+        if renewals:
+            return Response(
+                {"status": True, "renewals": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
 # User
 
 
@@ -505,15 +558,99 @@ def getSelfData(request, id):
         user = User.objects.get(id=id)
         img = None
         name = None
+        date = None
+
+        status = ClientTrials.objects.get(user=user)
+        if status.purchase_status == "valid":
+            date = status.purchase_end_date
+
         if user:
             usrData = Company.objects.get(user=user)
             img = usrData.logo.url if usrData.logo else None
             name = usrData.company_name
         else:
             usrData = None
-        details = {"name": name, "image": img}
+        details = {"name": name, "image": img, "endDate": date}
 
         return Response({"status": True, "data": details})
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def endDate(request, id):
+    try:
+        usr = User.objects.get(id=id)
+
+        date = ""
+        cStatus = ClientTrials.objects.get(user=usr)
+        if cStatus.purchase_status == "valid":
+            date = cStatus.purchase_end_date
+
+        return Response({"status": True, "endDate": date}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def fetchNotifications(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cStatus = ClientTrials.objects.get(user=usr)
+
+        if (
+            cStatus.purchase_status == "null"
+            and cStatus.trial_status == True
+            and cStatus.subscribe_status != "yes"
+        ):
+            exp_days = (cStatus.end_date - date.today()).days
+            if exp_days <= 10:
+                return Response(
+                    {"status": True, "days": exp_days, "subscribe": False},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response({"status": False}, status=status.HTTP_200_OK)
+        elif (
+            cStatus.purchase_status == "null"
+            and cStatus.trial_status == True
+            and cStatus.subscribe_status == "yes"
+        ):
+            exp_days = (cStatus.end_date - date.today()).days
+            if exp_days <= 10:
+                return Response(
+                    {"status": True, "days": exp_days, "subscribe": True},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response({"status": False}, status=status.HTTP_200_OK)
+        else:
+            return Response({"status": False}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def changeSubscribeStatus(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        trial = ClientTrials.objects.get(user=usr)
+
+        trial.subscribe_status = request.data["status"]
+        trial.save()
+        return Response({"status": True}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response(
@@ -1123,33 +1260,6 @@ def getSalesBills(request, id):
 
 
 @api_view(("GET",))
-def getSalesBillsFiltered(request):
-    try:
-        usr = User.objects.get(id=request.GET["Id"])
-        cmp = Company.objects.get(user=usr)
-
-        start = request.GET["start"]
-        end = request.GET["end"]
-
-        sales = Sales.objects.filter(cid=cmp, date__range=[start, end])
-
-        serializer = SalesSerializer(sales, many=True)
-        return Response(
-            {
-                "status": True,
-                "sales": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
-    except Exception as e:
-        print(e)
-        return Response(
-            {"status": False, "message": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
-@api_view(("GET",))
 def getSalesBillDetails(request):
     try:
         usr = User.objects.get(id=request.GET["Id"])
@@ -1222,6 +1332,762 @@ def deleteSalesBill(request, id):
         )
     except Exception as e:
         print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def salesBillPdf(request):
+    try:
+        id = request.GET["Id"]
+        saleId = request.GET["saleId"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        bill = Sales.objects.get(cid=cmp, bill_no=saleId)
+        items = Sales_items.objects.filter(cid=cmp, sid=bill)
+
+        total = bill.total_amount
+        words_total = num2words(total)
+
+        context = {"bill": bill, "cmp": cmp, "items": items, "total": words_total}
+
+        template_path = "sales_bill_pdf.html"
+        fname = "SalesBill_" + str(bill.bill_number)
+        # Create a Django response object, and specify content_type as pdftemp_
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = f"attachment; filename = {fname}.pdf"
+        # find the template and render it.
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # create a pdf
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        # if error then show some funny view
+        if pisa_status.err:
+            return HttpResponse("We had some errors <pre>" + html + "</pre>")
+        return response
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def shareSalesBillToEmail(request):
+    try:
+        id = request.data["Id"]
+        saleId = request.data["saleId"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        bill = Sales.objects.get(cid=cmp, bill_no=saleId)
+        items = Sales_items.objects.filter(cid=cmp, sid=bill)
+
+        total = bill.total_amount
+        words_total = num2words(total)
+
+        emails_string = request.data["email_ids"]
+
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+        # print(emails_list)
+
+        context = {"bill": bill, "cmp": cmp, "items": items, "total": words_total}
+
+        template_path = "sales_bill_pdf.html"
+        template = get_template(template_path)
+
+        html = template.render(context)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+        pdf = result.getvalue()
+        filename = f"SalesBill_{bill.bill_number}.pdf"
+        subject = f"SalesBill_{bill.bill_number}"
+        email = EmailMessage(
+            subject,
+            f"Hi,\nPlease find the attached details - SALES BILL-{bill.bill_number}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.phone_number}",
+            from_email=settings.EMAIL_HOST_USER,
+            to=emails_list,
+        )
+        email.attach(filename, pdf, "application/pdf")
+        email.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("PUT",))
+def updateSales(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+        sale = Sales.objects.get(bill_no=request.data["saleId"])
+
+        mutable_data = deepcopy(request.data)
+        mutable_data["cid"] = cmp.cmp_id
+
+        if request.data["party"] == "false":
+            mutable_data["party_name"] = ""
+            mutable_data["phone_number"] = ""
+            mutable_data["gstin"] = ""
+
+        serializer = SalesSerializer(sale, data=mutable_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            salesItems = json.loads(request.data["salesItems"])
+
+            # delete old transactions and stock updates
+            items = Sales_items.objects.filter(sid=sale)
+            for i in items:
+                itm = Items.objects.get(id=i.item.id)
+                itm.stock += i.quantity
+                itm.save()
+                Item_transactions.objects.filter(
+                    bill_number=sale.bill_number, type="Sale", item=itm
+                ).delete()
+            Sales_items.objects.filter(sid=sale).delete()
+
+            # Add sales items and corresponding item transactions
+            for ele in salesItems:
+                itm = Items.objects.get(id=int(ele.get("item")))
+                qty = int(ele.get("quantity"))
+                hsn = ele.get("hsn")
+                price = ele.get("price")
+                tax = (
+                    ele.get("taxGst")
+                    if request.data["state_of_supply"] == "State"
+                    else ele.get("taxIgst")
+                )
+
+                Sales_items.objects.create(
+                    cid=cmp,
+                    sid=sale,
+                    item=itm,
+                    name=itm.name,
+                    hsn=hsn,
+                    quantity=qty,
+                    rate=float(price),
+                    tax=tax,
+                    total=float(ele.get("total")),
+                )
+
+            # Add sales details in items transactions
+            for itm in salesItems:
+                tItem = Items.objects.get(id=itm.get("item"), cid=cmp)
+                Item_transactions.objects.create(
+                    cid=cmp,
+                    item=tItem,
+                    type="Sale",
+                    date=sale.date,
+                    quantity=itm.get("quantity"),
+                    bill_number=sale.bill_number,
+                )
+                tItem.stock -= int(itm.get("quantity"))
+                tItem.save()
+
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# Purchase
+@api_view(("GET",))
+def fetchPurchaseData(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        items = Items.objects.filter(cid=cmp)
+
+        itemSerializer = ItemSerializer(items, many=True)
+
+        # Fetching last bill and assigning upcoming bill no as current + 1
+        # Also check for if any bill is deleted and bill no is continuos w r t the deleted bill
+        latest_bill = Purchases.objects.filter(cid=cmp).order_by("-bill_no").first()
+
+        if latest_bill:
+            last_number = int(latest_bill.bill_number)
+            new_number = last_number + 1
+        else:
+            new_number = 1
+
+        if DeletedPurchases.objects.filter(cid=cmp).exists():
+            deleted = DeletedPurchases.objects.get(cid=cmp)
+
+            if deleted:
+                while int(deleted.bill_number) >= new_number:
+                    new_number += 1
+
+        return Response(
+            {
+                "status": True,
+                "items": itemSerializer.data,
+                "billNo": new_number,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def createPurchase(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        mutable_data = deepcopy(request.data)
+        mutable_data["cid"] = cmp.cmp_id
+
+        serializer = PurchaseSerializer(data=mutable_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            purchsItems = json.loads(request.data["salesItems"])
+            purchase = Purchases.objects.get(bill_no=serializer.data["bill_no"])
+
+            for ele in purchsItems:
+                itm = Items.objects.get(id=int(ele.get("item")))
+                qty = int(ele.get("quantity"))
+                hsn = ele.get("hsn")
+                price = ele.get("price")
+                tax = (
+                    ele.get("taxGst")
+                    if request.data["state_of_supply"] == "State"
+                    else ele.get("taxIgst")
+                )
+
+                Purchase_items.objects.create(
+                    cid=cmp,
+                    pid=purchase,
+                    item=itm,
+                    name=itm.name,
+                    hsn=hsn,
+                    quantity=qty,
+                    rate=float(price),
+                    tax=tax,
+                    total=float(ele.get("total")),
+                )
+
+            # Add sales details in items transactions
+            for itm in purchsItems:
+                tItem = Items.objects.get(id=itm.get("item"), cid=cmp)
+                Item_transactions.objects.create(
+                    cid=cmp,
+                    item=tItem,
+                    type="Purchase",
+                    date=purchase.date,
+                    quantity=itm.get("quantity"),
+                    bill_number=purchase.bill_number,
+                )
+                tItem.stock += int(itm.get("quantity"))
+                tItem.save()
+
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getPurchaseBills(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        purchases = Purchases.objects.filter(cid=cmp)
+
+        serializer = PurchaseSerializer(purchases, many=True)
+        return Response(
+            {
+                "status": True,
+                "sales": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getPurchaseBillDetails(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        purchase = Purchases.objects.get(bill_no=request.GET["purchaseId"])
+        items = Purchase_items.objects.filter(pid=purchase)
+
+        purchaseSerializer = PurchaseSerializer(purchase)
+        purItemsSerializer = PurchaseItemsSerializer(items, many=True)
+        return Response(
+            {
+                "status": True,
+                "bill": purchaseSerializer.data,
+                "items": purItemsSerializer.data,
+                "cmp": {
+                    "company_name": cmp.company_name,
+                    "address": cmp.address,
+                    "email": usr.email,
+                    "state": cmp.state,
+                    "country": cmp.country,
+                    "phone_number": cmp.phone_number,
+                    "gst_number": cmp.gst_number,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("DELETE",))
+def deletePurchaseBill(request, id):
+    try:
+        bill = Purchases.objects.get(bill_no=id)
+        cmp = bill.cid
+        items = Purchase_items.objects.filter(pid=bill)
+        for i in items:
+            itm = Items.objects.get(id=i.item.id)
+            itm.stock -= i.quantity
+            itm.save()
+            Item_transactions.objects.filter(
+                bill_number=bill.bill_number, type="Purchase", item=itm
+            ).delete()
+        Purchase_items.objects.filter(pid=bill).delete()
+
+        # Storing bill number to deleted table
+        # if entry exists and lesser than the current, update and save => Only one entry per company
+
+        if DeletedPurchases.objects.filter(cid=cmp).exists():
+            deleted = DeletedPurchases.objects.get(cid=cmp)
+            if deleted:
+                if int(bill.bill_number) > int(deleted.bill_number):
+                    deleted.bill_number = bill.bill_number
+                    deleted.save()
+        else:
+            deleted = DeletedPurchases(cid=cmp, bill_number=bill.bill_number)
+            deleted.save()
+
+        bill.delete()
+        return Response(
+            {
+                "status": True,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def purchaseBillPdf(request):
+    try:
+        id = request.GET["Id"]
+        purchaseId = request.GET["purchaseId"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        bill = Purchases.objects.get(cid=cmp, bill_no=purchaseId)
+        items = Purchase_items.objects.filter(cid=cmp, pid=bill)
+
+        total = bill.total_amount
+        words_total = num2words(total)
+
+        context = {"bill": bill, "cmp": cmp, "items": items, "total": words_total}
+
+        template_path = "purchase_bill_pdf.html"
+        fname = "PurchaseBill_" + str(bill.bill_number)
+        # Create a Django response object, and specify content_type as pdftemp_
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = f"attachment; filename = {fname}.pdf"
+        # find the template and render it.
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # create a pdf
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        # if error then show some funny view
+        if pisa_status.err:
+            return HttpResponse("We had some errors <pre>" + html + "</pre>")
+        return response
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def sharePurchaseBillToEmail(request):
+    try:
+        id = request.data["Id"]
+        purchaseId = request.data["purchaseId"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        bill = Purchases.objects.get(cid=cmp, bill_no=purchaseId)
+        items = Purchase_items.objects.filter(cid=cmp, pid=bill)
+
+        total = bill.total_amount
+        words_total = num2words(total)
+
+        emails_string = request.data["email_ids"]
+
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+        # print(emails_list)
+
+        context = {"bill": bill, "cmp": cmp, "items": items, "total": words_total}
+
+        template_path = "purchase_bill_pdf.html"
+        template = get_template(template_path)
+
+        html = template.render(context)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+        pdf = result.getvalue()
+        filename = f"PurchaseBill_{bill.bill_number}.pdf"
+        subject = f"PurchaseBill_{bill.bill_number}"
+        email = EmailMessage(
+            subject,
+            f"Hi,\nPlease find the attached details - PURCHASE BILL-{bill.bill_number}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.phone_number}",
+            from_email=settings.EMAIL_HOST_USER,
+            to=emails_list,
+        )
+        email.attach(filename, pdf, "application/pdf")
+        email.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("PUT",))
+def updatePurchase(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+        purchase = Purchases.objects.get(bill_no=request.data["purchaseId"])
+
+        mutable_data = deepcopy(request.data)
+        mutable_data["cid"] = cmp.cmp_id
+
+        if request.data["party"] == "false":
+            mutable_data["party_name"] = ""
+            mutable_data["phone_number"] = ""
+            mutable_data["gstin"] = ""
+
+        serializer = PurchaseSerializer(purchase, data=mutable_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            purItems = json.loads(request.data["salesItems"])
+
+            # delete old transactions and stock updates
+            items = Purchase_items.objects.filter(pid=purchase)
+            for i in items:
+                itm = Items.objects.get(id=i.item.id)
+                itm.stock -= i.quantity
+                itm.save()
+                Item_transactions.objects.filter(
+                    bill_number=purchase.bill_number, type="Purchase", item=itm
+                ).delete()
+            Purchase_items.objects.filter(pid=purchase).delete()
+
+            # Add sales items and corresponding item transactions
+            for ele in purItems:
+                itm = Items.objects.get(id=int(ele.get("item")))
+                qty = int(ele.get("quantity"))
+                hsn = ele.get("hsn")
+                price = ele.get("price")
+                tax = (
+                    ele.get("taxGst")
+                    if request.data["state_of_supply"] == "State"
+                    else ele.get("taxIgst")
+                )
+
+                Purchase_items.objects.create(
+                    cid=cmp,
+                    pid=purchase,
+                    item=itm,
+                    name=itm.name,
+                    hsn=hsn,
+                    quantity=qty,
+                    rate=float(price),
+                    tax=tax,
+                    total=float(ele.get("total")),
+                )
+
+            # Add sales details in items transactions
+            for itm in purItems:
+                tItem = Items.objects.get(id=itm.get("item"), cid=cmp)
+                Item_transactions.objects.create(
+                    cid=cmp,
+                    item=tItem,
+                    type="Purchase",
+                    date=purchase.date,
+                    quantity=itm.get("quantity"),
+                    bill_number=purchase.bill_number,
+                )
+                tItem.stock += int(itm.get("quantity"))
+                tItem.save()
+
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# Stock Reports
+@api_view(("GET",))
+def getStockReports(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        stockList = []
+        items = Items.objects.filter(cid=cmp)
+
+        for item in items:
+            stockIn = 0
+            stockOut = 0
+            for i in Item_transactions.objects.filter(cid=cmp, item=item.id).filter(
+                type="Purchase"
+            ):
+                stockIn += i.quantity
+
+            for i in Item_transactions.objects.filter(cid=cmp, item=item.id).filter(
+                type="Sale"
+            ):
+                stockOut += i.quantity
+
+            dict = {
+                "name": item.name,
+                "stockIn": stockIn,
+                "stockOut": stockOut,
+                "balance": item.stock,
+            }
+
+            stockList.append(dict)
+
+        return Response(
+            {
+                "status": True,
+                "items": ItemSerializer(items, many=True).data,
+                "stock": stockList,
+                "count": items.count(),
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getItemStockReports(request):
+    try:
+        usr = User.objects.get(id=request.GET["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        stockList = []
+        item = Items.objects.get(cid=cmp, id=request.GET["itemId"])
+
+        stockIn = 0
+        stockOut = 0
+        for i in Item_transactions.objects.filter(cid=cmp, item=item).filter(
+            type="Purchase"
+        ):
+            stockIn += i.quantity
+
+        for i in Item_transactions.objects.filter(cid=cmp, item=item).filter(
+            type="Sale"
+        ):
+            stockOut += i.quantity
+
+        dict = {
+            "name": item.name,
+            "stockIn": stockIn,
+            "stockOut": stockOut,
+            "balance": item.stock,
+        }
+
+        stockList.append(dict)
+
+        return Response(
+            {
+                "status": True,
+                "stock": stockList,
+                "balance": item.stock,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def shareStockReportsToEmail(request):
+    try:
+        id = request.data["Id"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        emails_string = request.data["email_ids"]
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+
+        excelfile = BytesIO()
+        workbook = Workbook()
+        workbook.remove(workbook.active)
+        worksheet = workbook.create_sheet(title="Stock Reports", index=1)
+
+        stockList = []
+        items = Items.objects.filter(cid=cmp)
+
+        for item in items:
+            stockIn = 0
+            stockOut = 0
+            for i in Item_transactions.objects.filter(cid=cmp, item=item.id).filter(
+                type="Purchase"
+            ):
+                stockIn += i.quantity
+
+            for i in Item_transactions.objects.filter(cid=cmp, item=item.id).filter(
+                type="Sale"
+            ):
+                stockOut += i.quantity
+
+            dict = {
+                "name": item.name,
+                "stockIn": stockIn,
+                "stockOut": stockOut,
+                "balance": item.stock,
+            }
+            stockList.append(dict)
+
+        columns = ["#", "Item", "Stock In", "Stock Out", "Balance"]
+        row_num = 1
+
+        # Assign the titles for each cell of the header
+        for col_num, column_title in enumerate(columns, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.value = column_title
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=False
+            )
+            cell.font = Font(bold=True)
+
+        # Iterate through all coins
+        sl_no = 0
+        for _, bill in enumerate(stockList, 1):
+            row_num += 1
+            sl_no += 1
+            # Define the data for each cell in the row
+            name, stockin, stockout, bal = (
+                bill.get(key) for key in ["name", "stockIn", "stockOut", "balance"]
+            )
+            row = [
+                sl_no,
+                name,
+                stockin,
+                stockout,
+                bal,
+            ]
+
+            # Assign the data for each cell of the row
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num, column=col_num)
+                cell.value = cell_value
+                cell.protection = Protection(locked=True)
+        workbook.save(excelfile)
+
+        mail_subject = f"Stock Reports - {date.today()}"
+        message = f"Hi,\nPlease find the STOCK REPORTS file attached. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.phone_number}"
+        message = EmailMessage(
+            mail_subject, message, settings.EMAIL_HOST_USER, emails_list
+        )
+        message.attach(
+            f"Stock Reports-{date.today()}.xlsx",
+            excelfile.getvalue(),
+            "application/vnd.ms-excel",
+        )
+        message.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
         return Response(
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

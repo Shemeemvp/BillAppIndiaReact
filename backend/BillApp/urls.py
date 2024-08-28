@@ -20,8 +20,12 @@ urlpatterns = [
     path("client_purchase/", clientPurchase),
     path("get_purchased_clients/", fetchPurchasedClients),
     path("cancel_subscription/", cancelSubscription),
+    path("admin_notifications/", getAdminNotifications),
     # User
     path("user_details/<int:id>/", getSelfData),
+    path("fetch_end_date/<int:id>/", endDate),
+    path("fetch_notifications/<int:id>/", fetchNotifications),
+    path("change_subscribe_status/", changeSubscribeStatus),
     # Items
     path("get_item_units/<int:id>/", getItemUnits),
     path("create_new_unit/", createNewUnit),
@@ -37,11 +41,26 @@ urlpatterns = [
     path("update_item/", updateItem),
     # Sales
     path("fetch_sales_data/<int:id>/", fetchSalesData),
-    path('get_item_data/', getItemData),
-    path('get_barcode_details/',getBarcodeDetails),
-    path('create_sales/', createSales),
+    path("get_item_data/", getItemData),
+    path("get_barcode_details/", getBarcodeDetails),
+    path("create_sales/", createSales),
     path("get_sales_bills/<int:id>/", getSalesBills),
-    path("get_sales_bills_filtered/", getSalesBillsFiltered),
     path("get_sale_bill_details/", getSalesBillDetails),
     path("delete_sales_bill/<int:id>/", deleteSalesBill),
+    path("sales_bill_pdf/", salesBillPdf),
+    path("share_sales_bill_email/", shareSalesBillToEmail),
+    path("update_sales/", updateSales),
+    # Purchase
+    path("fetch_purchase_data/<int:id>/", fetchPurchaseData),
+    path("create_purchase/", createPurchase),
+    path("get_purchase_bills/<int:id>/", getPurchaseBills),
+    path("get_purchase_bill_details/", getPurchaseBillDetails),
+    path("delete_purchase_bill/<int:id>/", deletePurchaseBill),
+    path("purchase_bill_pdf/", purchaseBillPdf),
+    path("share_purchase_bill_email/", sharePurchaseBillToEmail),
+    path("update_purchase/", updatePurchase),
+    # Stock Reports
+    path("get_stock_reports/<int:id>/", getStockReports),
+    path("get_item_stock_reports/", getItemStockReports),
+    path("share_stock_reports_email/", shareStockReportsToEmail),
 ]

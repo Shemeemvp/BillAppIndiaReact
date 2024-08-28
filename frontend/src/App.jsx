@@ -17,6 +17,12 @@ import EditItem from "./components/user/EditItem";
 import Sales from "./components/user/Sales";
 import AddSales from "./components/user/AddSales";
 import ViewSales from "./components/user/ViewSales";
+import EditSales from "./components/user/EditSales";
+import Purchases from "./components/user/Purchases";
+import AddPurchases from "./components/user/AddPurchases";
+import EditPurchases from "./components/user/EditPurchases";
+import ViewPurchases from "./components/user/ViewPurchases";
+import StockReports from "./components/user/StockReports";
 
 function App() {
   return (
@@ -47,9 +53,17 @@ function App() {
             {/* Sales */}
             <Route path="/sales" element={<Sales />}></Route>
             <Route path="/add_sales" element={<AddSales />}></Route>
-            {/* <Route path="/edit_item/:itemId/" element={<EditItem />}></Route> */}
+            <Route path="/edit_sales_bill/:saleId/" element={<EditSales />}></Route>
             <Route path="/view_sales_bill/:saleId/" element={<ViewSales />}></Route>
             
+            {/* Purchase */}
+            <Route path="/purchases" element={<Purchases />}></Route>
+            <Route path="/add_purchases" element={<AddPurchases />}></Route>
+            <Route path="/edit_purchase_bill/:purchaseId/" element={<EditPurchases />}></Route>
+            <Route path="/view_purchase_bill/:purchaseId/" element={<ViewPurchases />}></Route>
+
+            <Route path="/stock_reports" element={<StockReports />}></Route>
+
           </Route>
         </Routes>  
       </BrowserRouter>

@@ -1,21 +1,58 @@
-.p-datatable-tbody tr td{
-    padding: 0.2rem 0rem;
+.p-datatable-tbody tr td {
+  padding: 0.2rem 0rem;
 }
 
-.p-datatable-thead tr th{
-    padding: 0.2rem 0rem;
-    border-bottom: 1px solid gray;
+.p-datatable-thead tr th {
+  padding: 0.2rem 0rem;
+  border-bottom: 1px solid gray;
 }
 
-.userDashboard .bg-light{
-    background: #eae9c4 !important;
+.userDashboard .bg-light {
+  background: #eae9c4 !important;
 }
 .userDashboard .bg-white {
-    background-color: #407d58!important;
+  background-color: #407d58 !important;
 }
 .userDashboard .content {
-    background: rgb(255, 255, 255);
+  background: rgb(255, 255, 255);
 }
-.userDashboard .text-primary{
-    color: #003e27 !important;
+.userDashboard .text-primary {
+  color: #003e27 !important;
+}
+
+.userStockReports .action_btns {
+  background: #0d533ae6;
+  font-weight: 500;
+  color: white;
+  height: 2.5rem;
+  width: 6rem;
+}
+.userStockReports .action_btns:hover {
+  background: #1d8d68;
+  color: white;
+}
+.userStockReports .all_stock_reports {
+  background: #eae9c4;
+}
+
+.userStockReports table tr {
+  cursor: pointer;
+}
+.userStockReports .table-responsive {
+  max-height: 100vh;
+}
+.userStockReports .table-responsive::-webkit-scrollbar {
+  display: none;
+}
+
+.userStockReports .submitShareEmailBtn {
+  background: #c6aa589e;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.userStockReports .submitShareEmailBtn:hover {
+  background: #c6aa58;
 }

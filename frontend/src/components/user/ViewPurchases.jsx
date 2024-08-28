@@ -11,17 +11,17 @@ import Cookies from "js-cookie";
 import config from "../../functions/config";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-function ViewSales() {
+function ViewPurchases() {
   const navigate = useNavigate();
   const ID = Cookies.get("user_id");
-  const { saleId } = useParams();
+  const { purchaseId } = useParams();
 
   function activeLink() {
     var nav_links = document.querySelectorAll(".nav-item.nav-link");
 
     for (var i = 0; i < nav_links.length; i++) {
       nav_links[i].classList.remove("active");
-      if (nav_links[i].classList.contains("nav-sales")) {
+      if (nav_links[i].classList.contains("nav-purchase")) {
         nav_links[i].classList.add("active");
         break;
       }
@@ -33,8 +33,8 @@ function ViewSales() {
   }, []);
 
   const handleRowClick = (id) => {
-    window.history.pushState({}, "", `/view_sales_bill/${id}/`);
-    fetchSalesDetails(id);
+    window.history.pushState({}, "", `/view_purchase_bill/${id}/`);
+    fetchPurchaseDetails(id);
   };
 
   const [sales, setSales] = useState([]);
@@ -43,7 +43,7 @@ function ViewSales() {
 
   const fetchSales = () => {
     axios
-      .get(`${config.base_url}/get_sales_bills/${ID}/`)
+      .get(`${config.base_url}/get_purchase_bills/${ID}/`)
       .then((res) => {
         if (res.data.status) {
           let itms = res.data.sales;
@@ -64,13 +64,13 @@ function ViewSales() {
 
   const [cmp, setCmp] = useState({});
 
-  const fetchSalesDetails = (id) => {
+  const fetchPurchaseDetails = (id) => {
     var dt = {
-      salesId: id,
+      purchaseId: id,
       Id: ID,
     };
     axios
-      .get(`${config.base_url}/get_sale_bill_details/`, { params: dt })
+      .get(`${config.base_url}/get_purchase_bill_details/`, { params: dt })
       .then((res) => {
         if (res.data.status) {
           let bill = res.data.bill;
@@ -91,10 +91,10 @@ function ViewSales() {
   };
 
   useEffect(() => {
-    fetchSalesDetails(saleId);
+    fetchPurchaseDetails(purchaseId);
   }, []);
 
-  function searchSalesList(e) {
+  function searchPurchaseList(e) {
     var rows = document.querySelectorAll("#purchases_table tbody tr");
     var val = e.target.value.trim().replace(/ +/g, " ").toLowerCase();
 
@@ -108,7 +108,7 @@ function ViewSales() {
     });
   }
 
-  function handleDeleteSalesBill() {
+  function handleDeletePurchaseBill() {
     Swal.fire({
       title: `Delete Bill '${salesBill.bill_number}' ?`,
       text: "All details will be erased.!",
@@ -120,14 +120,14 @@ function ViewSales() {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`${config.base_url}/delete_sales_bill/${salesBill.bill_no}/`)
+          .delete(`${config.base_url}/delete_purchase_bill/${salesBill.bill_no}/`)
           .then((res) => {
             if (res.data.status) {
               Toast.fire({
                 icon: "success",
                 title: "Bill deleted.",
               });
-              navigate("/sales");
+              navigate("/purchases");
             } else {
               Swal.fire({
                 icon: "error",
@@ -234,10 +234,10 @@ function ViewSales() {
   function billPdf() {
     var data = {
       Id: ID,
-      saleId: saleId,
+      purchaseId: purchaseId,
     };
     axios
-      .get(`${config.base_url}/sales_bill_pdf/`, {
+      .get(`${config.base_url}/purchase_bill_pdf/`, {
         responseType: "blob",
         params: data,
       })
@@ -246,7 +246,7 @@ function ViewSales() {
         const fileURL = URL.createObjectURL(file);
         const a = document.createElement("a");
         a.href = fileURL;
-        a.download = `SalesBill_${salesBill.bill_number}.pdf`;
+        a.download = `PurchaseBill_${salesBill.bill_number}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -260,48 +260,6 @@ function ViewSales() {
           });
         }
       });
-  }
-
-  const [createdTime, setCreatedTime] = useState("");
-
-  function updateDateTime() {
-    var currentDate = new Date();
-    var day = currentDate.getDate();
-    var month = currentDate.getMonth() + 1;
-    var year = currentDate.getFullYear();
-    var hours = currentDate.getHours();
-    var minutes = currentDate.getMinutes();
-    var seconds = currentDate.getSeconds();
-    var formattedDay = day < 10 ? `0${day}` : day;
-    var formattedMonth = month < 10 ? `0${month}` : month;
-    var formattedHours = hours < 10 ? `0${hours}` : hours;
-    var formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    var formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-    var formattedDateTime = `${formattedDay}/${formattedMonth}/${year} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-    // document.getElementById("dateTimeDisplay").textContent = formattedDateTime;
-    setCreatedTime(formattedDateTime);
-  }
-
-  useEffect(() => {
-    setInterval(updateDateTime, 1000);
-  }, []);
-
-  function showSlip() {
-    document.getElementById("slip_btn").style.background = "#0d533ae6";
-    document.getElementById("template_btn").style.background = "darkkhaki";
-    document.getElementById("printBill").style.display = "none";
-    document.getElementById("printSlip").style.display = "block";
-    document.getElementById("templatePrintButton").style.display = "none";
-    document.getElementById("slipPrintButton").style.display = "";
-  }
-
-  function showTemplate() {
-    document.getElementById("template_btn").style.background = "#0d533ae6";
-    document.getElementById("slip_btn").style.background = "darkkhaki";
-    document.getElementById("printSlip").style.display = "none";
-    document.getElementById("printBill").style.display = "block";
-    document.getElementById("templatePrintButton").style.display = "";
-    document.getElementById("slipPrintButton").style.display = "none";
   }
 
   const [emailIds, setEmailIds] = useState("");
@@ -335,13 +293,13 @@ function ViewSales() {
       } else {
         // document.getElementById("share_to_email_form").submit();
         var em = {
-          saleId: saleId,
+          purchaseId: purchaseId,
           Id: ID,
           email_ids: emailIds,
           email_message: emailMessage,
         };
         axios
-          .post(`${config.base_url}/share_sales_bill_email/`, em)
+          .post(`${config.base_url}/share_purchase_bill_email/`, em)
           .then((res) => {
             if (res.data.status) {
               Toast.fire({
@@ -400,7 +358,7 @@ function ViewSales() {
                       <div className="all_sales_table px-1 py-2 border rounded-1">
                         <div className="top d-flex justify-content-start px-2 py-3">
                           <div className="sales_head">
-                            <h4>All Sales</h4>
+                            <h4>All Purchases</h4>
                           </div>
                         </div>
                         <div className="row px-2">
@@ -410,12 +368,12 @@ function ViewSales() {
                               id="purchases_search_box"
                               placeholder="Search..."
                               className="form-control"
-                              onChange={searchSalesList}
+                              onChange={searchPurchaseList}
                               autoComplete="off"
                             />
                             <button
                               className="btn add_new_btn ms-2"
-                              onClick={() => navigate("/add_sales")}
+                              onClick={() => navigate("/add_purchases")}
                             >
                               <i className="fa fa-plus me-2" />
                               ADD
@@ -474,33 +432,23 @@ function ViewSales() {
                                 id="template_btn"
                                 className="btn btn-sm me-1"
                                 title="TEMPLATE"
-                                onClick={showTemplate}
                               >
                                 <i className="fas fa-file-alt me-1" />
                                 TEMPLATE
-                              </button>
-                              <button
-                                id="slip_btn"
-                                className="btn btn-sm"
-                                title="SLIP"
-                                onClick={showSlip}
-                              >
-                                <i className="fas fa-receipt me-1" />
-                                SLIP
                               </button>
                             </div>
                             <div className="action_btns d-flex">
                               <button
                                 className="btn btn-sm action_btn ms-1"
                                 onClick={() =>
-                                  navigate(`/edit_sales_bill/${salesBill.bill_no}/`)
+                                  navigate(`/edit_purchase_bill/${salesBill.bill_no}/`)
                                 }
                               >
                                 <i className="fa-solid fa-pen-to-square me-1" />
                                 EDIT
                               </button>
                               <button
-                                onClick={handleDeleteSalesBill}
+                                onClick={handleDeletePurchaseBill}
                                 className="btn btn-sm action_btn ms-1"
                               >
                                 <i className="fa-solid fa-trash me-1" />
@@ -510,15 +458,6 @@ function ViewSales() {
                                 className="btn btn-sm action_btn ms-1"
                                 id="templatePrintButton"
                                 onClick={() => printSheet("printBill")}
-                              >
-                                <i className="fas fa-print me-1" />
-                                PRINT
-                              </button>
-                              <button
-                                className="btn btn-sm action_btn ms-1"
-                                id="slipPrintButton"
-                                style={{ display: "none" }}
-                                onClick={() => printSheet("printSlip")}
                               >
                                 <i className="fas fa-print me-1" />
                                 PRINT
@@ -546,7 +485,6 @@ function ViewSales() {
                           <div
                             id="printBill"
                             className="printTemplates template1"
-                            style={{ display: "block" }}
                           >
                             <div className="page bg-light px-3 py-2">
                               <div
@@ -559,7 +497,7 @@ function ViewSales() {
                                 ></div>
                                 <div className="col-md-4 d-flex justify-content-center align-items-center bill_header">
                                   <center className="h4 text-white">
-                                    <b>SALES BILL</b>
+                                    <b>PURCHASE BILL</b>
                                   </center>
                                 </div>
                                 <div className="col-md-4 d-flex justify-content-end">
@@ -813,265 +751,6 @@ function ViewSales() {
                               </div>
                             </div>
                           </div>
-                          {/* Bill Slip view */}
-                          <div
-                            className="saleBillSlip"
-                            id="printSlip"
-                            style={{ display: "none" }}
-                          >
-                            <div
-                              className="slip-container bg-light"
-                              id="slip_container"
-                            >
-                              <div className="slip">
-                                <h5 className="fw-bold text-center">
-                                  {cmp.company_name}
-                                </h5>
-                                <div className="address text-center">
-                                  <p>{cmp.address}</p>
-                                  <p>
-                                    {cmp.state}
-                                    {","} {cmp.country}
-                                  </p>
-                                  <p>{cmp.phone_number}</p>
-                                  {cmp.gst_number ? (
-                                    <p>GSTIN: {cmp.gst_number}</p>
-                                  ) : null}
-                                </div>
-                                <div className="divider" />
-                                <div
-                                  className="equal-length-container"
-                                  style={{ color: "black", fontWeight: "bold" }}
-                                >
-                                  <div
-                                    className="equal-length-item"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    Item
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "95%",
-                                      }}
-                                    />
-                                  </div>
-                                  <div
-                                    className="equal-length-item ml-2"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    HSN
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "63%",
-                                        marginLeft: 10,
-                                      }}
-                                    />
-                                  </div>
-                                  <div
-                                    className="equal-length-item"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    Qty
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "60%",
-                                        marginLeft: 10,
-                                      }}
-                                    />
-                                  </div>
-                                  <div
-                                    className="equal-length-item"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    Rate
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "65%",
-                                        marginLeft: 10,
-                                      }}
-                                    />
-                                  </div>
-                                  <div
-                                    className="equal-length-item"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    Tax
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "60%",
-                                        marginLeft: 10,
-                                      }}
-                                    />
-                                  </div>
-                                  <div
-                                    className="equal-length-item"
-                                    style={{ textAlign: "center" }}
-                                  >
-                                    Total
-                                    <hr
-                                      style={{
-                                        borderBottom: "1px solid black",
-                                        marginTop: "1vh",
-                                        width: "65%",
-                                        marginLeft: 10,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                                {billItems &&
-                                  billItems.map((i) => (
-                                    <div
-                                      className="equal-length-container"
-                                      style={{
-                                        color: "black",
-                                        fontSize: "small",
-                                        wordWrap: "break-word",
-                                        marginBottom: "1vh",
-                                      }}
-                                    >
-                                      <div
-                                        className="equal-length-item"
-                                        style={{
-                                          textAlign: "center",
-                                          marginLeft: 2,
-                                        }}
-                                      >
-                                        {i.name}
-                                      </div>
-                                      <div
-                                        className="equal-length-item"
-                                        style={{ textAlign: "right" }}
-                                      >
-                                        {i.hsn}
-                                      </div>
-                                      <div
-                                        className="equal-length-item"
-                                        style={{ textAlign: "center" }}
-                                      >
-                                        {i.quantity}
-                                      </div>
-                                      <div
-                                        className="equal-length-item"
-                                        style={{ textAlign: "center" }}
-                                      >
-                                        {i.rate}
-                                      </div>
-                                      <div className="equal-length-item">
-                                        {i.tax}
-                                      </div>
-                                      <div
-                                        className="equal-length-item"
-                                        style={{ textAlign: "center" }}
-                                      >
-                                        {i.total}
-                                      </div>
-                                    </div>
-                                  ))}
-                                <div className="subtot mt-5">
-                                  <div className="subtot-item d-flex justify-content-between">
-                                    <span>Subtotal</span>
-                                    <span>
-                                      <span>₹ </span>
-                                      {salesBill.subtotal}
-                                    </span>
-                                  </div>
-                                  {salesBill.state_of_supply == "State" ? (
-                                    <>
-                                      <div className="subtot-item d-flex justify-content-between">
-                                        <span>CGST</span>
-                                        <span>
-                                          <span>₹ </span>
-                                          {salesBill.cgst}
-                                        </span>
-                                      </div>
-                                      <div className="subtot-item d-flex justify-content-between">
-                                        <span>SGST</span>
-                                        <span>
-                                          <span>₹ </span>
-                                          {salesBill.sgst}
-                                        </span>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="subtot-item d-flex justify-content-between">
-                                      <span>IGST</span>
-                                      <span>
-                                        <span>₹ </span>
-                                        {salesBill.igst}
-                                      </span>
-                                    </div>
-                                  )}
-                                  <div className="subtot-item d-flex justify-content-between">
-                                    <span>Tax</span>
-                                    <span>
-                                      <span>₹ </span>
-                                      {salesBill.tax}
-                                    </span>
-                                  </div>
-                                  {salesBill.adjustment != 0.0 ? (
-                                    <div className="subtot-item d-flex justify-content-between">
-                                      <span>Adjustment</span>
-                                      <span>
-                                        <span>₹ </span>
-                                        {salesBill.adjustment}
-                                      </span>
-                                    </div>
-                                  ) : null}
-                                </div>
-                                <div className="divider" />
-                                <div className="grandtot fw-bold d-flex justify-content-between">
-                                  <span>
-                                    <strong>TOTAL</strong>
-                                  </span>
-                                  <span>
-                                    <strong>
-                                      <span>₹ </span>
-                                      {salesBill.total_amount}
-                                    </strong>
-                                  </span>
-                                </div>
-                                <div className="divider" />
-                                <div className="paid-by mb-4 d-flex justify-content-between">
-                                  <span>Paid By:</span>
-                                  <span>Credit</span>
-                                </div>
-                                <div className="datetime d-flex justify-content-between">
-                                  <p className="">Printed On:</p>
-                                  <span id="dateTimeDisplay">
-                                    {createdTime}
-                                  </span>
-                                </div>
-                                <div className="trns-id d-flex flex-column">
-                                  <div>
-                                    <p className="float-start">
-                                      <span>Transaction ID:</span>
-                                      <span>XXXXXXXXX</span>
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="float-start">
-                                      <span>Vendor ID:</span>
-                                      <span>XXXXXXXXXX</span>
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="footer mt-4 text-center">
-                                  <p>
-                                    Thank you for supporting Local business!
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1164,4 +843,4 @@ function ViewSales() {
   );
 }
 
-export default ViewSales;
+export default ViewPurchases;

@@ -3,10 +3,11 @@ import Cookies from "js-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import config from "../../functions/config";
+import Swal from "sweetalert2";
 
 function UserNavbar() {
   const navigate = useNavigate();
-  const [noti, setNoti] = useState(true);
+  const [noti, setNoti] = useState(false);
   const [days, setDays] = useState("");
   const [subscribe, setSubscribe] = useState(false);
 
@@ -37,6 +38,29 @@ function UserNavbar() {
     getUserDetails();
   }, []);
 
+  const getNotifications = () => {
+    axios
+      .get(`${config.base_url}/fetch_notifications/${ID}/`)
+      .then((res) => {
+        if (res.data.status) {
+          setNoti(true);
+          setDays(res.data.days);
+          setSubscribe(res.data.subscribe);
+        } else {
+          setNoti(false);
+          setSubscribe(false);
+          setDays("");
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR==", err);
+      });
+  };
+
+  useEffect(() => {
+    getNotifications();
+  }, []);
+
   function handleLogout() {
     Cookies.remove("user_id");
     Cookies.remove("role");
@@ -49,6 +73,40 @@ function UserNavbar() {
     document.querySelector(".sidebar").classList.toggle("open");
     document.querySelector(".content").classList.toggle("open");
   }
+
+  const changeSubscribeStatus = (status) => {
+    var data = {
+      Id: ID,
+      status: status,
+    };
+    axios
+      .post(`${config.base_url}/change_subscribe_status/`, data)
+      .then((res) => {
+        if (res.data.status) {
+          Toast.fire({
+            icon: "success",
+            title: "Updated.!",
+          });
+          getNotifications();
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR==", err);
+      });
+  };
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
   return (
     <nav className="navbar navbar-expand b-primary navbar-dark sticky-top px-4 py-0">
       <Link to="/dashboard" className="navbar-brand d-flex d-lg-none me-4">
@@ -105,21 +163,21 @@ function UserNavbar() {
                   </h6>
                 ) : (
                   <h6 className="fw-normal mb-0">
-                    Your Trial Period expires in {"days"} days..
+                    Your Trial Period expires in {days} days..
                   </h6>
                 )}
                 {!subscribe ? (
                   <div className="d-flex px-1">
                     <small>Want to Purchase.?</small>
-                    <div className="d-flex justify-content-end align-items-center">
+                    <div className="d-flex justify-content-end align-items-center ms-1">
                       <a
-                        href="{% url 'changeTrialStatus' 'yes' %}"
+                        onClick={() => changeSubscribeStatus("yes")}
                         className="text-decoration-none fw-bolder text-success"
                       >
                         Yes
                       </a>
                       <a
-                        href="{% url 'changeTrialStatus' 'no' %}"
+                        onClick={() => changeSubscribeStatus("no")}
                         className="text-decoration-none fw-bolder text-danger ms-3 me-3"
                       >
                         Cancel
