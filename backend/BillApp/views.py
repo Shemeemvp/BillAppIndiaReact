@@ -166,16 +166,19 @@ def userLogin(request):
                 refresh = RefreshToken.for_user(user)
                 log_status = ClientTrials.objects.get(user=user.id)
 
-                if log_status.purchase_status == 'null' and log_status.trial_status == True:
+                if (
+                    log_status.purchase_status == "null"
+                    and log_status.trial_status == True
+                ):
                     exp_days = (log_status.end_date - date.today()).days
                     if exp_days < 0:
                         log_status.trial_status = False
                         log_status.save()
                         pass
-                elif log_status.purchase_status == 'valid':
+                elif log_status.purchase_status == "valid":
                     sub_exp_days = (log_status.purchase_end_date - date.today()).days
                     if sub_exp_days < 0:
-                        log_status.purchase_status = 'expired'
+                        log_status.purchase_status = "expired"
                         log_status.save()
                         pass
                 else:
@@ -305,16 +308,16 @@ def fetchRegisteredClients(request):
         # Checking clients Subscription and trial status, updates if expired.
         trials = ClientTrials.objects.all()
         for cStatus in trials:
-            if cStatus.purchase_status == 'null' and cStatus.trial_status == True:
+            if cStatus.purchase_status == "null" and cStatus.trial_status == True:
                 exp_days = (cStatus.end_date - date.today()).days
                 if exp_days < 0:
                     cStatus.trial_status = False
                     cStatus.save()
                     pass
-            elif cStatus.purchase_status == 'valid':
+            elif cStatus.purchase_status == "valid":
                 sub_exp_days = (cStatus.purchase_end_date - date.today()).days
                 if sub_exp_days < 0:
-                    cStatus.purchase_status = 'expired'
+                    cStatus.purchase_status = "expired"
                     cStatus.save()
                     pass
             else:
@@ -570,9 +573,110 @@ def getSelfData(request, id):
             name = usrData.company_name
         else:
             usrData = None
-        details = {"name": name, "image": img, "endDate": date}
+
+        cmpSerializer = CompanySerializer(usrData)
+        details = {
+            "name": name,
+            "image": img,
+            "endDate": date,
+            "company": cmpSerializer.data,
+        }
 
         return Response({"status": True, "data": details})
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getDashboardDetails(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        sales = Sales.objects.filter(cid=cmp)
+        purchases = Purchases.objects.filter(cid=cmp)
+        items = Items.objects.filter(cid=cmp)
+        todSale = 0
+        totSale = 0
+        todPurchase = 0
+        totPurchase = 0
+        for i in sales:
+            totSale += i.total_amount
+            if i.date == date.today():
+                todSale += i.total_amount
+
+        for i in purchases:
+            totPurchase += i.total_amount
+            if i.date == date.today():
+                todPurchase += i.total_amount
+
+        # Chart data
+
+        data1 = []
+        data2 = []
+        data3 = []
+        data4 = []
+        data5 = []
+        label = []
+
+        for yr in range((date.today().year) - 4, (date.today().year) + 1):
+            label.append(yr)
+            salesAmount = 0
+            purchaseAmount = 0
+            for i in sales:
+                if i.date.year == yr:
+                    salesAmount += i.total_amount
+
+            for i in purchases:
+                if i.date.year == yr:
+                    purchaseAmount += i.total_amount
+
+            data1.append(float(salesAmount))
+            data2.append(float(purchaseAmount))
+
+            stockIn = 0
+            stockOut = 0
+            stockBalance = 0
+            for i in Item_transactions.objects.filter(cid=cmp).filter(type="Purchase"):
+                if i.date.year == yr:
+                    stockIn += i.quantity
+
+            for i in Item_transactions.objects.filter(cid=cmp).filter(type="Sale"):
+                if i.date.year == yr:
+                    stockOut += i.quantity
+
+            for i in Item_transactions.objects.filter(cid=cmp):
+                if i.date.year == yr and (
+                    i.type == "Opening Stock"
+                    or i.type == "Add Stock"
+                    or i.type == "Purchase"
+                ):
+                    stockBalance += i.quantity
+
+                if i.date.year == yr and (i.type == "Reduce Stock" or i.type == "Sale"):
+                    stockBalance -= i.quantity
+
+            data3.append(stockIn)
+            data4.append(stockOut)
+            data5.append(stockBalance)
+
+        context = {
+            "todSale": f"{todSale:.2f}",
+            "totSale": f"{totSale:.2f}",
+            "todPurchase": f"{todPurchase:.2f}",
+            "totPurchase": f"{totPurchase:.2f}",
+            "salesData": data1,
+            "purchaseData": data2,
+            "stockIn": data3,
+            "stockOut": data4,
+            "stockBalance": data5,
+            "label": label,
+        }
+        return Response({"status": True, "data": context}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response(
@@ -651,6 +755,106 @@ def changeSubscribeStatus(request):
         trial.subscribe_status = request.data["status"]
         trial.save()
         return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("PUT",))
+@parser_classes((MultiPartParser, FormParser))
+def updateCompanyLogo(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        serializer = CompanySerializer(cmp, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def removeCompanyLogo(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        cmp.logo = None
+        cmp.save()
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def updateProfileData(request):
+    try:
+        usr = User.objects.get(id=request.data["Id"])
+        cmp = Company.objects.get(user=usr)
+
+        uName = request.data["username"]
+        email = request.data["email"]
+        if uName != usr.username and User.objects.filter(username=uName).exists():
+            return Response(
+                {"status": False, "message": "Username exists.!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        else:
+            usr.username = uName
+            usr.save()
+
+        if email != usr.email and User.objects.filter(email=email).exists():
+            return Response(
+                {"status": False, "message": "Email exists.!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        else:
+            usr.email = email
+            usr.save()
+
+        cmpName = request.data["company_name"]
+        cmpPhone = request.data["phone_number"]
+        cmpGst = request.data["gst_number"]
+        cmpAddress = request.data["address"]
+        cmpState = request.data["state"]
+        cmpCountry = request.data["country"]
+
+        cmp.company_name = cmpName
+        cmp.phone_number = cmpPhone
+        cmp.gst_number = cmpGst
+        cmp.address = cmpAddress
+        cmp.state = cmpState
+        cmp.country = cmpCountry
+
+        cmp.save()
+
+        return Response(
+            {"status": True},
+            status=status.HTTP_200_OK,
+        )
+
     except Exception as e:
         print(e)
         return Response(

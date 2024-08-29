@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./Index.css";
 import AOS from "aos";
 import axios from "axios";
@@ -26,6 +26,67 @@ function Index() {
       duration: 1000,
     });
   }, []);
+
+  useEffect(() => {
+    const backtotop = document.querySelector(".back-to-top");
+    const demoButton = document.querySelector(".get-trial-button");
+
+    const toggleBacktotop = () => {
+      if (window.scrollY > 100) {
+        backtotop?.classList.add("active");
+      } else {
+        backtotop?.classList.remove("active");
+      }
+    };
+
+    const toggleTrialBtn = () => {
+      if (window.scrollY > 100) {
+        demoButton?.classList.add("active");
+      } else {
+        demoButton?.classList.remove("active");
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("scroll", toggleBacktotop);
+    window.addEventListener("scroll", toggleTrialBtn);
+
+    // Call the functions to set initial state
+    toggleBacktotop();
+    toggleTrialBtn();
+
+    // Cleanup function to remove event listeners
+    return () => {
+      window.removeEventListener("scroll", toggleBacktotop);
+      window.removeEventListener("scroll", toggleTrialBtn);
+    };
+  }, []);
+
+  const [isNavbarMobile, setIsNavbarMobile] = useState(false);
+
+  const scrollTo = (hash) => {
+    const element = document.querySelector(hash);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleLinkClick = (e, hash) => {
+    e.preventDefault();
+
+    const navbar = document.querySelector("#navbar");
+    if (navbar.classList.contains("navbar-mobile")) {
+      setIsNavbarMobile(false);
+    }
+
+    const navbarToggle = document.querySelector(".mobile-nav-toggle");
+    if (navbarToggle) {
+      navbarToggle.classList.toggle("bi-list");
+      navbarToggle.classList.toggle("bi-x");
+    }
+
+    scrollTo(hash);
+  };
 
   function togglePasswordVisibility1() {
     const pwd = document.getElementById("pwd");
@@ -161,7 +222,7 @@ function Index() {
         .get(`${config.base_url}/validate_username/`, { params: us })
         .then((res) => {
           if (res.data.is_taken) {
-            document.getElementById("email").value = "";
+            document.getElementById("user").value = "";
             document.getElementById("userErr").textContent =
               'Username "' + user + '" already exists..';
             document.getElementById("userErr").style.display = "block";
@@ -261,7 +322,7 @@ function Index() {
         username: username,
         email: email,
         password: password,
-        confirm_password: confirmPassword
+        confirm_password: confirmPassword,
       };
       axios
         .post(`${config.base_url}/register_trial_user/`, data, {
@@ -277,7 +338,7 @@ function Index() {
           }
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err);
           if (!err.response.data.status) {
             Swal.fire({
               icon: "error",
@@ -289,6 +350,66 @@ function Index() {
             });
           }
         });
+    }
+  };
+
+  function openChatBox() {
+    document.getElementById("chat-box-icon").style.display = "none";
+    document.getElementById("chat-box").style.display = "block";
+  }
+  function closeChatBox() {
+    document.getElementById("chat-box").style.display = "none";
+    document.getElementById("chat-box-icon").style.display = "block";
+  }
+
+  const faq = [
+    { question: "hai", answer: "Hai How can i help you ?" },
+    { question: "hello", answer: "Hai How can i help you ?" },
+    { question: "hi..", answer: "Hai How can i help you ?" },
+    { question: "Hi..", answer: "Hai How can i help you ?" },
+    { question: "Hi", answer: "Hai How can i help you ?" },
+    { question: "goodbye", answer: "Talk to you later!" },
+    { question: "nice talking to you!", answer: "I am glad I could help" },
+    // Add more question-answer pairs here
+  ];
+
+  const [userInput, setUserInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const chatMessageBoxRef = useRef(null);
+
+  useEffect(() => {
+    if (chatMessageBoxRef.current) {
+      chatMessageBoxRef.current.scrollTop =
+        chatMessageBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const displayMessage = (message, isUser) => {
+    setMessages((prevMessages) => [...prevMessages, { text: message, isUser }]);
+  };
+
+  const handleSend = () => {
+    const question = userInput.trim();
+    setUserInput("");
+
+    if (question !== "") {
+      displayMessage(question, true);
+
+      const matchingQuestion = faq.find(
+        (entry) => entry.question.toLowerCase() === question.toLowerCase()
+      );
+      if (matchingQuestion) {
+        displayMessage(matchingQuestion.answer, false);
+      } else {
+        displayMessage("Please contact Us for more details..", false);
+        displayMessage("Tel: +91 9074 156 818", false);
+      }
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSend();
     }
   };
 
@@ -320,34 +441,57 @@ function Index() {
                 <a href="#">Billing Software</a>
               </h1>
             </div>
-            <nav id="navbar" className="navbar indexNavbar">
+            <nav
+              id="navbar"
+              className={
+                isNavbarMobile
+                  ? "navbar indexNavbar navbar-mobile"
+                  : "navbar indexNavbar"
+              }
+            >
               <ul>
                 <li>
-                  <a className="nav-link scrollto" href="#about">
+                  <a
+                    className="nav-link scrollto"
+                    href="#about"
+                    onClick={(e) => handleLinkClick(e, "#about")}
+                  >
                     About
                   </a>
                   <span className="hover" />
                 </li>
                 <li>
-                  <a className="nav-link scrollto" href="#planAndPricing">
+                  <a
+                    className="nav-link scrollto"
+                    href="#planAndPricing"
+                    onClick={(e) => handleLinkClick(e, "#planAndPricing")}
+                  >
                     Plan &amp; Pricing
                   </a>
                   <span className="hover" />
                 </li>
                 <li>
-                  <a className="nav-link scrollto" href="#FAQs">
+                  <a
+                    className="nav-link scrollto"
+                    href="#FAQs"
+                    onClick={(e) => handleLinkClick(e, "#FAQs")}
+                  >
                     FAQs
                   </a>
                   <span className="hover" />
                 </li>
                 <li>
-                  <a className="nav-link" href="{% url 'goBlog' %}">
+                  <Link className="nav-link" to="/blog">
                     Blog
-                  </a>
+                  </Link>
                   <span className="hover" />
                 </li>
                 <li>
-                  <a className="nav-link scrollto" href="#contact">
+                  <a
+                    className="nav-link scrollto"
+                    href="#contact"
+                    onClick={(e) => handleLinkClick(e, "#contact")}
+                  >
                     Contact Us
                   </a>
                   <span className="hover" />
@@ -358,7 +502,12 @@ function Index() {
                   </Link>
                 </li>
               </ul>
-              <i className="bi bi-list mobile-nav-toggle" />
+              <i
+                className={`mobile-nav-toggle ${
+                  isNavbarMobile ? "bi-x" : "bi-list"
+                }`}
+                onClick={() => setIsNavbarMobile(!isNavbarMobile)}
+              />
             </nav>
             {/* .navbar */}
           </div>
@@ -1128,7 +1277,7 @@ function Index() {
           id="chat-box-icon"
           className="chat-box-icon"
           style={{ display: "block" }}
-          onclick="openChatBox()"
+          onClick={openChatBox}
         >
           <div className="chatbox-button">
             <span>
@@ -1148,7 +1297,7 @@ function Index() {
               <h6 className="mb-0">BillingSoftwareIndia</h6>
               <span
                 id="chat-box-close"
-                onclick="closeChatBox()"
+                onClick={closeChatBox}
                 style={{ cursor: "pointer", fontSize: "2em" }}
               >
                 <i className="bx bx-x" />
@@ -1158,6 +1307,8 @@ function Index() {
               className="card-body"
               data-mdb-perfect-scrollbar="true"
               id="chat-message-box"
+              ref={chatMessageBoxRef}
+              style={{ height: "300px", overflowY: "scroll" }}
             >
               <div className="chatmain_content">
                 <p className="text-muted">
@@ -1165,7 +1316,18 @@ function Index() {
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p>
               </div>
-              <div className="chat_messages" id="chat-messages" />
+              <div className="chat_messages" id="chat-messages">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`message ${
+                      msg.isUser ? "user-message" : "bot-message"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="card-footer text-muted d-flex justify-content-start align-items-center p-3">
               <img
@@ -1177,19 +1339,23 @@ function Index() {
                 type="text"
                 className="form-control"
                 id="chatbox-input"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={handleKeyPress}
                 placeholder="Type message"
               />
               <a className="ms-1 text-muted" href="#!">
                 <i className="fa fa-paperclip" />
               </a>
-              <a className="ms-3 text-muted" id="emoji-button" href="#!">
-                <i className="fa fa-smile" />
-              </a>
+              {/* <a className="ms-3 text-muted" id="emoji-button" href="#!">
+            <i className="fa fa-smile" />
+          </a> */}
               <a
                 className="ms-3 text-primary"
                 href="#!"
                 id="send-btn"
                 role="button"
+                onClick={handleSend}
               >
                 <i className="fa fa-paper-plane" />
               </a>
@@ -1213,7 +1379,7 @@ function Index() {
         </footer>
         <a
           href="#"
-          className="back-to-top d-flex align-items-center justify-content-center"
+          className="back-to-top indexPageBtn d-flex align-items-center justify-content-center"
         >
           <i className="bi bi-arrow-up-short" />
         </a>

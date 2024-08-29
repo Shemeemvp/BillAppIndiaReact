@@ -25,7 +25,7 @@ h6 {
 /*--------------------------------------------------------------
   # Back to top button
   --------------------------------------------------------------*/
-.back-to-top {
+.back-to-top.indexPageBtn {
   position: fixed;
   visibility: hidden;
   opacity: 0;
@@ -55,14 +55,14 @@ h6 {
   transition: all 0.4s;
 }
 
-.back-to-top i,
+.back-to-top.indexPageBtn i,
 .get-trial-button i {
   font-size: 24px;
   color: #fff;
   line-height: 0;
 }
 
-.back-to-top:hover,
+.back-to-top.indexPageBtn:hover,
 .get-trial-button:hover {
   background: #003e27;
   color: #fff;
@@ -73,7 +73,7 @@ h6 {
     color: #fff;
   } */
 
-.back-to-top.active,
+.back-to-top.indexPageBtn.active,
 .get-trial-button.active {
   visibility: visible;
   opacity: 1;

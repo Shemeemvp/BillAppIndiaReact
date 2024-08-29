@@ -95,6 +95,48 @@ function UserNavbar() {
       });
   };
 
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const redirectPages = (e) => {
+    e.preventDefault();
+    const searchKey = searchKeyword.toLowerCase();
+
+    const data1 = [
+      "sale",
+      "sales",
+      "add sales",
+      "sales add",
+      "create sales",
+      "sales create",
+      "new sale",
+      "sale new",
+    ];
+    const data2 = [
+      "purchase",
+      "add purchase",
+      "purchase add",
+      "create purchase",
+      "purchase create",
+      "new purchase",
+      "purchase new",
+    ];
+    const data3 = ["stock", "stock reports", "reports"];
+    const data4 = ["item", "add item", "new item", "item add"];
+
+    if (data1.some((keyword) => searchKey.includes(keyword))) {
+      navigate("/add_sales");
+    } else if (data2.some((keyword) => searchKey.includes(keyword))) {
+      navigate("/add_purchases");
+    } else if (data3.some((keyword) => searchKey.includes(keyword))) {
+      navigate("/stock_reports");
+    } else if (data4.some((keyword) => searchKey.includes(keyword))) {
+      navigate("/add_items");
+    } else {
+      alert("Not matches found..!");
+      navigate("/dashboard");
+    }
+  };
+
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -121,13 +163,14 @@ function UserNavbar() {
       </a>
       <form
         className="d-none d-md-flex d-sm-flex ms-auto w-50"
-        action="{% url 'redirectPage' %}"
-        method="get"
+        onSubmit={redirectPages}
       >
         <input
           className="form-control bg-light border-0"
           name="url"
           type="search"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
           placeholder="Search"
           required
         />

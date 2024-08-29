@@ -1,0 +1,54 @@
+.userProfile .bg-light {
+  background: #eae9c4 !important;
+}
+.userProfile .bg-white {
+  background-color: #407d58 !important;
+}
+.userProfile .content {
+  background: rgb(255, 255, 255);
+}
+.userProfile .text-primary {
+  color: #003e27 !important;
+}
+.userProfile .left_box {
+  background: #eae9c4;
+  padding: 1rem 0.2rem;
+  height: 100%;
+  border-radius: 6px;
+}
+.userProfile .right_box {
+  background: #eae9c4;
+  padding: 1rem 0.2rem;
+  height: fit-content;
+  border-radius: 6px;
+}
+.userProfile .edit_data_section {
+  background: #eae9c4;
+  padding: 1rem 0.2rem;
+  height: fit-content;
+  border-radius: 6px;
+}
+.userProfile .edit_data_section .form-group {
+  margin-bottom: 1rem;
+}
+.userProfile .data_entr {
+  margin: 1.1rem 0rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.userProfile .data_head {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+.userProfile .data {
+  float: right;
+  font-size: 1rem;
+  font-weight: 500;
+}
+@media screen and (max-width: 768px) {
+  .userProfile .left_box,
+  .userProfile .right_box {
+    height: fit-content;
+    margin-bottom: 1rem;
+  }
+}

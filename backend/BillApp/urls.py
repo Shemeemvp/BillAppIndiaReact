@@ -23,9 +23,13 @@ urlpatterns = [
     path("admin_notifications/", getAdminNotifications),
     # User
     path("user_details/<int:id>/", getSelfData),
+    path("get_dashboard_data/<int:id>/", getDashboardDetails),
     path("fetch_end_date/<int:id>/", endDate),
     path("fetch_notifications/<int:id>/", fetchNotifications),
     path("change_subscribe_status/", changeSubscribeStatus),
+    path("update_company_logo/", updateCompanyLogo),
+    path("remove_company_logo/", removeCompanyLogo),
+    path("update_profile_data/", updateProfileData),
     # Items
     path("get_item_units/<int:id>/", getItemUnits),
     path("create_new_unit/", createNewUnit),

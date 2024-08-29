@@ -23,13 +23,18 @@ import AddPurchases from "./components/user/AddPurchases";
 import EditPurchases from "./components/user/EditPurchases";
 import ViewPurchases from "./components/user/ViewPurchases";
 import StockReports from "./components/user/StockReports";
+import Profile from "./components/user/Profile";
+import ScrollToTop from "./components/ScrollToTop";
+import Blog from "./components/index/Blog";
 
 function App() {
   return (
     <>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />}></Route>
+          <Route path="/blog" element={<Blog />}></Route>
           <Route path="/login" element={<Login />}></Route>
 
           <Route element={<AdminPrivateRoutes />}>
@@ -42,6 +47,7 @@ function App() {
 
           <Route element={<CompanyPrivateRoutes />}>
             <Route path="/dashboard" element={<Dashboard />}></Route>
+            <Route path="/profile" element={<Profile />}></Route>
 
             {/* Items */}
             <Route path="/items" element={<Items />}></Route>
