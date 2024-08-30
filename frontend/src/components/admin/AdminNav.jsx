@@ -54,7 +54,7 @@ function AdminNav() {
   return (
     <nav className="navbar navbar-expand b-primary navbar-dark sticky-top px-4 py-0">
       <a href="/go_dashboard" className="navbar-brand d-flex d-lg-none me-4">
-        <h2 className="text-white mb-0">BS</h2>
+        <h2 className="text-white mb-0">BSI</h2>
       </a>
       <a
         onClick={toggleSidebar}

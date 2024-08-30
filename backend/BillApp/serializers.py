@@ -21,8 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
     class Meta:
         model = Company
         fields = "__all__"

@@ -26,6 +26,8 @@ import StockReports from "./components/user/StockReports";
 import Profile from "./components/user/Profile";
 import ScrollToTop from "./components/ScrollToTop";
 import Blog from "./components/index/Blog";
+import SalesReports from "./components/user/SalesReports";
+import PurchaseReports from "./components/user/PurchaseReports";
 
 function App() {
   return (
@@ -68,7 +70,10 @@ function App() {
             <Route path="/edit_purchase_bill/:purchaseId/" element={<EditPurchases />}></Route>
             <Route path="/view_purchase_bill/:purchaseId/" element={<ViewPurchases />}></Route>
 
+            {/* Reports */}
             <Route path="/stock_reports" element={<StockReports />}></Route>
+            <Route path="/sales_reports" element={<SalesReports />}></Route>
+            <Route path="/purchase_reports" element={<PurchaseReports />}></Route>
 
           </Route>
         </Routes>  

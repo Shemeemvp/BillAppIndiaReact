@@ -30,6 +30,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, status
 from .serializers import *
 from copy import deepcopy
+from collections import defaultdict
+from django.db.models import Sum
 
 # Create your views here.
 
@@ -87,9 +89,8 @@ def registerTrialUser(request):
                     email=eml,
                     password=pswrd,
                 )
-                userInfo.save()
                 # cData = User.objects.get(id=userInfo.id)
-                request.data["user"] = userInfo.id
+                request.data["user"] =  userInfo.id
                 serializer = CompanySerializer(data=request.data)
                 if serializer.is_valid():
                     serializer.save()
@@ -578,6 +579,7 @@ def getSelfData(request, id):
         details = {
             "name": name,
             "image": img,
+            "user": UserSerializer(user).data,
             "endDate": date,
             "company": cmpSerializer.data,
         }
@@ -2292,6 +2294,376 @@ def shareStockReportsToEmail(request):
 
         return Response({"status": True}, status=status.HTTP_200_OK)
     except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def shareSalesReportsToEmail(request):
+    try:
+        id = request.data["Id"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        emails_string = request.data["email_ids"]
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+
+        excelfile = BytesIO()
+        workbook = Workbook()
+        workbook.remove(workbook.active)
+        worksheet = workbook.create_sheet(title="Sales Reports", index=1)
+
+        stockList = []
+        items = Sales.objects.filter(cid=cmp)
+
+        for item in items:
+            dict = {
+                "date": item.date,
+                "invoice_no": item.bill_number,
+                "name": item.party_name,
+                "amount": item.total_amount,
+            }
+            stockList.append(dict)
+
+        columns = ["#", "Date", "Invoice No", "Party Name", "Amount"]
+        row_num = 1
+
+        # Assign the titles for each cell of the header
+        for col_num, column_title in enumerate(columns, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.value = column_title
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=False
+            )
+            cell.font = Font(bold=True)
+
+        # Iterate through all coins
+        sl_no = 0
+        for _, bill in enumerate(stockList, 1):
+            row_num += 1
+            sl_no += 1
+            # Define the data for each cell in the row
+            date, invoice_no, name, amount = (
+                bill.get(key) for key in ["date", "invoice_no", "name", "amount"]
+            )
+            row = [
+                sl_no,
+                date,
+                invoice_no,
+                name,
+                amount,
+            ]
+
+            # Assign the data for each cell of the row
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num, column=col_num)
+                cell.value = cell_value
+                cell.protection = Protection(locked=True)
+        workbook.save(excelfile)
+
+        mail_subject = "Sales Reports"
+        message = f"Hi,\nPlease find the SALES REPORTS file attached. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.phone_number}"
+        message = EmailMessage(
+            mail_subject, message, settings.EMAIL_HOST_USER, emails_list
+        )
+        message.attach(
+            f"Sales Reports.xlsx",
+            excelfile.getvalue(),
+            "application/vnd.ms-excel",
+        )
+        message.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getSalesReportDetails(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        sales = Sales.objects.filter(cid=cmp)
+
+        current_year = datetime.now().year
+
+        monthly_sales_data = defaultdict(int)
+        for month in range(1, 13):
+            monthly_sales_data[month] = (
+                Sales.objects.filter(
+                    date__month=month, date__year=current_year, cid=cmp
+                ).aggregate(total_sales=Sum("total_amount"))["total_sales"]
+                or 0
+            )
+
+        # Retrieve yearly sales data
+        yearly_sales_data = defaultdict(int)
+        for year in range(2022, current_year + 1):
+            yearly_sales_data[year] = (
+                Sales.objects.filter(date__year=year, cid=cmp).aggregate(
+                    total_sales=Sum("total_amount")
+                )["total_sales"]
+                or 0
+            )
+
+        # Prepare data for chart
+        month_names = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
+        monthly_labels = [
+            f"{month_names[month - 1]} {current_year}" for month in range(1, 13)
+        ]
+        monthly_sales = [monthly_sales_data[month] for month in range(1, 13)]
+
+        yearly_labels = [str(year) for year in range(2014, current_year + 1)]
+        yearly_sales = [
+            yearly_sales_data[year] for year in range(2014, current_year + 1)
+        ]
+
+        # Prepare data for chart
+        chart_data = {
+            "monthly_labels": monthly_labels,
+            "monthly_sales": monthly_sales,
+            "yearly_labels": yearly_labels,
+            "yearly_sales": yearly_sales,
+        }
+
+        serializer = SalesSerializer(sales, many=True)
+        return Response(
+            {
+                "status": True,
+                "company": CompanySerializer(cmp).data,
+                "sales": serializer.data,
+                "chart": chart_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def sharePurchaseReportsToEmail(request):
+    try:
+        id = request.data["Id"]
+
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        emails_string = request.data["email_ids"]
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+
+        excelfile = BytesIO()
+        workbook = Workbook()
+        workbook.remove(workbook.active)
+        worksheet = workbook.create_sheet(title="Purchase Reports", index=1)
+
+        stockList = []
+        items = Purchases.objects.filter(cid=cmp)
+
+        for item in items:
+            dict = {
+                "date": item.date,
+                "invoice_no": item.bill_number,
+                "name": item.party_name,
+                "amount": item.total_amount,
+            }
+            stockList.append(dict)
+
+        columns = ["#", "Date", "Invoice No", "Party Name", "Amount"]
+        row_num = 1
+
+        # Assign the titles for each cell of the header
+        for col_num, column_title in enumerate(columns, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.value = column_title
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=False
+            )
+            cell.font = Font(bold=True)
+
+        # Iterate through all coins
+        sl_no = 0
+        for _, bill in enumerate(stockList, 1):
+            row_num += 1
+            sl_no += 1
+            # Define the data for each cell in the row
+            date, invoice_no, name, amount = (
+                bill.get(key) for key in ["date", "invoice_no", "name", "amount"]
+            )
+            row = [
+                sl_no,
+                date,
+                invoice_no,
+                name,
+                amount,
+            ]
+
+            # Assign the data for each cell of the row
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num, column=col_num)
+                cell.value = cell_value
+                cell.protection = Protection(locked=True)
+        workbook.save(excelfile)
+
+        mail_subject = "Purchase Reports"
+        message = f"Hi,\nPlease find the PURCHASE REPORTS file attached. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.phone_number}"
+        message = EmailMessage(
+            mail_subject, message, settings.EMAIL_HOST_USER, emails_list
+        )
+        message.attach(
+            f"Purchase Reports.xlsx",
+            excelfile.getvalue(),
+            "application/vnd.ms-excel",
+        )
+        message.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("GET",))
+def getPurchaseReportDetails(request, id):
+    try:
+        usr = User.objects.get(id=id)
+        cmp = Company.objects.get(user=usr)
+
+        purchases = Purchases.objects.filter(cid=cmp)
+        total_purchase_amount = purchases.aggregate(total_amount=Sum("total_amount"))[
+            "total_amount"
+        ]
+
+        current_year = datetime.now().year
+
+        monthly_purchase_data = defaultdict(int)
+        for month in range(1, 13):
+            monthly_purchase_data[month] = (
+                Purchases.objects.filter(
+                    date__month=month, date__year=current_year, cid=cmp
+                ).aggregate(total_sales=Sum("total_amount"))["total_sales"]
+                or 0
+            )
+
+        # Retrieve yearly sales data
+        yearly_purchases_data = defaultdict(int)
+        for year in range(2022, current_year + 1):
+            yearly_purchases_data[year] = (
+                Purchases.objects.filter(date__year=year, cid=cmp).aggregate(
+                    total_sales=Sum("total_amount")
+                )["total_sales"]
+                or 0
+            )
+
+        # Prepare data for chart
+        month_names = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
+        monthly_labels = [
+            f"{month_names[month - 1]} {current_year}" for month in range(1, 13)
+        ]
+        monthly_purchases = [monthly_purchase_data[month] for month in range(1, 13)]
+
+        yearly_labels = [str(year) for year in range(2014, current_year + 1)]
+        yearly_purchases = [
+            yearly_purchases_data[year] for year in range(2014, current_year + 1)
+        ]
+
+        # Prepare data for chart
+        chart_data = {
+            "monthly_labels": monthly_labels,
+            "monthly_purchases": monthly_purchases,
+            "yearly_labels": yearly_labels,
+            "yearly_purchases": yearly_purchases,
+        }
+
+        serializer = PurchaseSerializer(purchases, many=True)
+        return Response(
+            {
+                "status": True,
+                "company": CompanySerializer(cmp).data,
+                "purchases": serializer.data,
+                "chart": chart_data,
+                "total_purchase_amount": f"{total_purchase_amount:.2f}",
+            },
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(("POST",))
+def forgotPassword(request):
+    try:
+        email = request.data["email"]
+        if User.objects.filter(email=email).exists():
+            user = User.objects.filter(email=email).first()
+            password = str(randint(100000, 999999))
+            # print(password)
+            user.set_password(password)
+            user.save()
+
+            # SEND MAIL CODE
+            subject = "Forgot Password"
+            message = f"Dear user,\nYour Password has been reset as you requested. You can login with the password given below\n\nPassword:{password}"
+            recipient = user.email
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient])
+
+            return Response(
+                {"status": True},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"status": False, "message": "User does not exists..!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        print(e)
         return Response(
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

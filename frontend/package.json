@@ -9,6 +9,7 @@
     "aos": "^2.3.4",
     "axios": "^1.7.4",
     "chart.js": "^4.4.4",
+    "html2pdf.js": "^0.9.3",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "primeicons": "^7.0.0",

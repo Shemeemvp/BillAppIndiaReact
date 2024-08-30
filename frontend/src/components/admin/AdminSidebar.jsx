@@ -7,7 +7,7 @@ function AdminSidebar() {
     <div className="sidebar b-primary pe-4 pb-3">
       <nav className="navbar b-primary navbar-dark">
         <a href="#" className="navbar-brand mx-4 mb-3">
-          <h4 className="text-light">BillingSoftware</h4>
+          <h4 className="text-light">BillingSoftwareIndia</h4>
         </a>
         <div className="d-flex align-items-center ms-4 mb-4">
           <div className="position-relative">

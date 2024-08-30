@@ -18,6 +18,7 @@ function Profile() {
   const [logo, setLogo] = useState(null);
 
   const [company, setCompany] = useState({});
+  const [userData, setUserData] = useState({});
   const [companyLogo, setCompanyLogo] = useState(null);
 
   const [userName, setUserName] = useState("");
@@ -42,11 +43,12 @@ function Profile() {
             logImg = `${config.base_url}/${details.image}`;
             setUpdateLogo(true);
           }
+          setUserData(details.user);
           setCompanyLogo(logImg);
-          setUserName(cmp.user.username);
+          setUserName(details.user.username);
           setCompanyName(cmp.company_name);
           setGstIn(cmp.gst_number);
-          setEmail(cmp.user.email);
+          setEmail(details.user.email);
           setContact(cmp.phone_number);
           setAddress(cmp.address);
           setState(cmp.state);
@@ -162,7 +164,7 @@ function Profile() {
   }
 
   async function validateForm() {
-    if (email != "" && email != company.user.email) {
+    if (email != "" && email != userData.email) {
       var em = {
         email: email,
       };
@@ -185,7 +187,7 @@ function Profile() {
       return false;
     }
 
-    if (userName != "" && userName != company.user.username) {
+    if (userName != "" && userName != userData.username) {
       var us = {
         user: userName,
       };
@@ -262,7 +264,7 @@ function Profile() {
 
   function checkEmail(email) {
     // var email = document.getElementById("email").value.trim();
-    if (email != "" && email != company.user.email) {
+    if (email != "" && email != userData.email) {
       var em = {
         email: email,
       };
@@ -288,7 +290,7 @@ function Profile() {
   }
 
   function checkUsername(user) {
-    if (user != "" && user != company.user.username) {
+    if (user != "" && user != userData.username) {
       var us = {
         user: user,
       };
@@ -531,7 +533,7 @@ function Profile() {
                         </div>
                         <div className="val">
                           <span className="data">
-                            {company?.user?.email || "Loading..."}
+                            {userData?.email || "Loading..."}
                           </span>
                         </div>
                       </div>

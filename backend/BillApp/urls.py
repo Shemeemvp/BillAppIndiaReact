@@ -67,4 +67,10 @@ urlpatterns = [
     path("get_stock_reports/<int:id>/", getStockReports),
     path("get_item_stock_reports/", getItemStockReports),
     path("share_stock_reports_email/", shareStockReportsToEmail),
+    path("get_sales_report_details/<int:id>/", getSalesReportDetails),
+    path("share_sales_reports_email/", shareSalesReportsToEmail),
+    path("get_purchase_report_details/<int:id>/", getPurchaseReportDetails),
+    path("share_purchase_reports_email/", sharePurchaseReportsToEmail),
+    # Forgot Password
+    path("forgot_password/", forgotPassword),
 ]

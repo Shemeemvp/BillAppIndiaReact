@@ -206,6 +206,7 @@ function AddItems() {
       axios
         .post(`${config.base_url}/create_new_item/`, dt)
         .then((res) => {
+          console.log(res)
           if (res.data.status) {
             Toast.fire({
               icon: "success",

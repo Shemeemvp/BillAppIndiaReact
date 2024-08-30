@@ -49,6 +49,51 @@ function Login() {
       });
   };
 
+  const [forgotEmail, setForgotEmail] = useState("");
+
+  const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+
+    var email = forgotEmail;
+    if (email == "") {
+      Swal.fire({
+        icon: "warning",
+        title: "Enter Email.!",
+      });
+    } else if (!emailRegex.test(email)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid Email.!",
+      });
+    } else {
+      var em = {
+        email: forgotEmail,
+      };
+      axios
+        .post(`${config.base_url}/forgot_password/`, em)
+        .then((res) => {
+          if (res.data.status) {
+            setForgotEmail("");
+            document.getElementById("closeForgotModal").click();
+            Toast.fire({
+              icon: "success",
+              title: "Password has been sent via mail.!",
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          if (!err.response.data.status) {
+            Swal.fire({
+              icon: "error",
+              title: `${err.response.data.message}`,
+            });
+          }
+        });
+    }
+  };
+
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -358,15 +403,16 @@ function Login() {
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
+                id="closeForgotModal"
                 aria-label="Close"
               />
             </div>
-            <div className="modal-body">
-              <form
-                method="post"
-                className="needs-validation w-100"
-                id="forgot_pass_form"
-              >
+            <form
+              onSubmit={handleForgotPassword}
+              className="needs-validation w-100"
+              id="forgot_pass_form"
+            >
+              <div className="modal-body">
                 <div className="form-group w-100">
                   <label htmlFor="item_unitsymbol">
                     Enter Your registered Email ID
@@ -375,24 +421,26 @@ function Login() {
                     type="email"
                     className="form-control"
                     name="forgot_email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
                     id="forgot_email"
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <div
-              className="modal-footer d-flex justify-content-center"
-              style={{ borderTop: "1px solid #ffffff" }}
-            >
-              <button
-                type="button"
-                id="send_code"
-                className="submit_btn w-50 text-uppercase"
+              </div>
+              <div
+                className="modal-footer d-flex justify-content-center"
+                style={{ borderTop: "1px solid #ffffff" }}
               >
-                SEND CODE
-              </button>
-            </div>
+                <button
+                  type="submit"
+                  id="send_code"
+                  className="submit_btn w-50 text-uppercase"
+                >
+                  SEND CODE
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
