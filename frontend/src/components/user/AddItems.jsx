@@ -101,8 +101,8 @@ function AddItems() {
   const [unit, setUnit] = useState("");
   const [hsn, setHsn] = useState("");
   const [taxRef, setTaxRef] = useState(true);
-  const [interStateTax, setInterStateTax] = useState("");
-  const [intraStateTax, setIntraStateTax] = useState("");
+  const [interStateTax, setInterStateTax] = useState("IGST0[0%]");
+  const [intraStateTax, setIntraStateTax] = useState("GST0[0%]");
   const [purchasePrice, setPurchasePrice] = useState(0);
   const [salesPrice, setSalesPrice] = useState(0);
   const [stock, setStock] = useState(0);

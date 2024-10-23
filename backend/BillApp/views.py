@@ -411,16 +411,22 @@ def createNewPaymentTerm(request):
 
         # PaymentTerms.objects.create(duration=dur, term=term, days=dys)
         serializer = PaymentTermsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"status": True, "data": serializer.data},
-                status=status.HTTP_200_OK,
-            )
+        if not PaymentTerms.objects.filter(term = term, duration = dur).exists():
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {"status": True, "data": serializer.data},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"status": False, "data": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             return Response(
-                {"status": False, "data": serializer.errors},
-                status=status.HTTP_200_OK,
+                {"status": False, "message": "Term already exists.!"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
     except Exception as e:
         return Response(
@@ -937,12 +943,18 @@ def createNewItem(request):
         cmp = Company.objects.get(user=usr)
         request.data["cid"] = cmp.cmp_id
 
-        bc = request.data["barcode"]
+        bc = request.data.get("barcode").upper()
         if bc != "":
-            bc = bc.upper()
+            request.data["barcode"] = bc
         if bc != "" and Items.objects.filter(cid=cmp, barcode=bc).exists():
             return Response(
                 {"status": False, "message": "Barcode already exists, try another.!"},
+                status=status.HTTP_226_IM_USED,
+            )
+
+        if Items.objects.filter(cid=cmp, hsn=request.data.get('hsn')).exists():
+            return Response(
+                {"status": False, "message": "HSN already exists, try another.!"},
                 status=status.HTTP_226_IM_USED,
             )
         tax = request.data["tax_reference"]
@@ -1206,7 +1218,8 @@ def updateItem(request):
         cmp = Company.objects.get(user=usr)
         request.data["cid"] = cmp.cmp_id
 
-        item = Items.objects.get(id=request.data["item_id"])
+        itemId = request.data["item_id"]
+        item = Items.objects.get(id=itemId)
         trns = (
             Item_transactions.objects.filter(item=item.id)
             .filter(type="Opening Stock")
@@ -1226,6 +1239,10 @@ def updateItem(request):
         bc = request.data["barcode"]
         if bc != "":
             bc = bc.upper()
+            request.data["barcode"] = bc
+        else:
+            request.data["barcode"] = item.barcode
+
         if (
             item.barcode != bc
             and bc != ""
@@ -1233,6 +1250,12 @@ def updateItem(request):
         ):
             return Response(
                 {"status": False, "message": "Barcode already exists, try another.!"},
+                status=status.HTTP_226_IM_USED,
+            )
+        
+        if Items.objects.filter(cid=cmp, hsn=request.data['hsn']).exclude(id=itemId).exists():
+            return Response(
+                {"status": False, "message": "HSN already exists, try another.!"},
                 status=status.HTTP_226_IM_USED,
             )
         tax = request.data["tax_reference"]
@@ -2393,6 +2416,9 @@ def getSalesReportDetails(request, id):
         cmp = Company.objects.get(user=usr)
 
         sales = Sales.objects.filter(cid=cmp)
+        total_sales_amount = sales.aggregate(total_amount=Sum("total_amount"))[
+            "total_amount"
+        ]
 
         current_year = datetime.now().year
 
@@ -2455,6 +2481,7 @@ def getSalesReportDetails(request, id):
                 "company": CompanySerializer(cmp).data,
                 "sales": serializer.data,
                 "chart": chart_data,
+                "total_sales_amount": f"{total_sales_amount:.2f}",
             },
             status=status.HTTP_200_OK,
         )

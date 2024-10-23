@@ -221,6 +221,10 @@ function PurchaseReports() {
         dateDisplay2.textContent =
           "From: " + formattedFromDate + " To: " + formattedToDate;
       }
+    } else {
+      reloadTable();
+      document.getElementById("dateDisplay").textContent = "";
+      document.getElementById("dateDisplay2").textContent = "";
     }
   };
 
@@ -359,7 +363,9 @@ function PurchaseReports() {
 
   function clearDropdown(columnIndex) {
     document.getElementById("filterInput" + columnIndex).value = "";
-    filterTable(columnIndex);
+    document.getElementById("dropdownContent" + columnIndex).style.display =
+      "none";
+    reloadTable();
   }
 
   function filterTable(index) {
@@ -375,7 +381,7 @@ function PurchaseReports() {
     var table = document.getElementById("sales_reports_table");
     var table2 = document.getElementById("sales_reports_table_pdf");
     var rows = table.getElementsByTagName("tr");
-    var rows2 = table.getElementsByTagName("tr");
+    var rows2 = table2.getElementsByTagName("tr");
     // var emptyMessage = document.getElementById("emptyMessage");
     var isEmpty = true;
     for (var i = 1; i < rows.length; i++) {
@@ -402,7 +408,7 @@ function PurchaseReports() {
             }
           }
         } else {
-          if (textValue.toUpperCase().includes(input)) {
+          if (textValue == input) {
             rows[i].style.display = "table-row";
             isEmpty = false;
           } else {
@@ -436,7 +442,7 @@ function PurchaseReports() {
             }
           }
         } else {
-          if (textValue.toUpperCase().includes(input)) {
+          if (textValue == input) {
             rows2[i].style.display = "table-row";
             isEmpty = false;
           } else {
@@ -446,6 +452,24 @@ function PurchaseReports() {
       }
     }
     // emptyMessage.style.display = isEmpty ? "block" : "none";
+  }
+
+  function reloadTable() {
+    var table = document.getElementById("sales_reports_table");
+    var table2 = document.getElementById("sales_reports_table_pdf");
+    var rows = table.getElementsByTagName("tr");
+    var rows2 = table2.getElementsByTagName("tr");
+    for (var i = 1; i < rows.length; i++) {
+      rows[i].style.display = "table-row";
+    }
+
+    for (var i = 1; i < rows2.length; i++) {
+      rows2[i].style.display = "table-row";
+    }
+
+    if (startDate != "" && endDate != "") {
+      filterTableRows(startDate, endDate);
+    }
   }
 
   function formatDateString(inputDate) {
@@ -600,7 +624,7 @@ function PurchaseReports() {
                       <div className="col-12 col-md-7 d-flex justify-content-md-end justify-content-center mt-2 mt-md-0">
                         <button
                           className="btn btn-sm action_btns"
-                          onClick={() => printSection("report")}
+                          onClick={() => printSection("report2")}
                         >
                           <i className="fas fa-print me-1" />
                           Print
@@ -1068,15 +1092,17 @@ function PurchaseReports() {
           <div
             id="dateDisplay2"
             style={{
-              marginBottom: 10,
               color: "black",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
             }}
-          />
+          ></div>
         </center>
 
         <div className="stock_reports_table_section table-responsive">
           <table
-            className="table table-responsive-md mt-2 table-hover stock_reports_table"
+            className="table table-responsive-md mt-2 table-hover stock_reports_table custom-table"
             style={{ textAlign: "center" }}
             id="sales_reports_table_pdf"
           >

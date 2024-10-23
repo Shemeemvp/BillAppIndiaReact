@@ -95,7 +95,7 @@ class Purchase_items(models.Model):
     hsn = models.CharField(max_length=15)
     quantity = models.IntegerField()
     rate = models.FloatField()
-    tax = models.CharField(max_length=10)
+    tax = models.CharField(max_length=15)
     total = models.FloatField()
 
 
@@ -125,7 +125,7 @@ class Sales_items(models.Model):
     hsn = models.CharField(max_length=15)
     quantity = models.IntegerField()
     rate = models.FloatField()
-    tax = models.CharField(max_length=10)
+    tax = models.CharField(max_length=15)
     total = models.FloatField()
 
 
