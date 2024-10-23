@@ -110,7 +110,7 @@ function ViewSales() {
 
   function handleDeleteSalesBill() {
     Swal.fire({
-      title: `Delete Bill '${salesBill.bill_number}' ?`,
+      title: `Delete Invoice '${salesBill.bill_number}' ?`,
       text: "All details will be erased.!",
       icon: "warning",
       showCancelButton: true,
@@ -395,7 +395,7 @@ function ViewSales() {
             <div className="container-fluid">
               <div className="sales_section py-4">
                 <div className="row">
-                  <div className="col-md-4 col-sm-12">
+                  <div className="col-md-4 col-12">
                     <div className="all_sales">
                       <div className="all_sales_table px-1 py-2 border rounded-1">
                         <div className="top d-flex justify-content-start px-2 py-3">
@@ -430,7 +430,7 @@ function ViewSales() {
                             <thead>
                               <tr>
                                 <th scope="col" className="col-8">
-                                  BILL NO.
+                                  INVOICE NO.
                                 </th>
                                 <th scope="col" className="col-2">
                                   TOTAL
@@ -445,7 +445,7 @@ function ViewSales() {
                                     onClick={() => handleRowClick(i.bill_no)}
                                   >
                                     <td scope="col" className="col-8">
-                                      BILL - {i.bill_number}
+                                    INVOICE - {i.bill_number}
                                     </td>
                                     <td scope="col" className="col-4">
                                       <span className="me-1">₹</span>
@@ -459,17 +459,17 @@ function ViewSales() {
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-8 col-sm-12">
+                  <div className="col-md-8 col-12">
                     <div className="purchase_bill_view">
                       <div className="purchase_bill px-1 py-2 border rounded-1">
                         <div className="top d-flex justify-content-start px-2 py-3">
                           <div className="sl_head">
-                            <h3>BILL - {salesBill.bill_number}</h3>
+                            <h3>INVOICE - {salesBill.bill_number}</h3>
                           </div>
                         </div>
                         <div className="row px-2">
-                          <div className="col-md-12 d-flex justify-content-between">
-                            <div className="template_switch">
+                          <div className="col-12 col-md-4 mb-2">
+                            <div className="template_switch  d-flex justify-content-start">
                               <button
                                 id="template_btn"
                                 className="btn btn-sm me-1"
@@ -489,7 +489,9 @@ function ViewSales() {
                                 SLIP
                               </button>
                             </div>
-                            <div className="action_btns d-flex">
+                          </div>
+                          <div className="col-12 col-md-8">
+                            <div className="action_btns d-flex float-end">
                               <button
                                 className="btn btn-sm action_btn ms-1"
                                 onClick={() =>
@@ -555,17 +557,17 @@ function ViewSales() {
                               >
                                 <div
                                   id="ember2512"
-                                  className="col-md-4 d-flex justify-content-start tooltip-container ember-view ribbon text-ellipsis"
+                                  className="col-12 col-md-4 d-flex justify-content-start tooltip-container ember-view ribbon text-ellipsis"
                                 ></div>
-                                <div className="col-md-4 d-flex justify-content-center align-items-center bill_header">
+                                <div className="col-12 col-md-4 d-flex justify-content-center align-items-center bill_header">
                                   <center className="h4 text-white">
-                                    <b>SALES BILL</b>
+                                    <b>SALES INVOICE</b>
                                   </center>
                                 </div>
-                                <div className="col-md-4 d-flex justify-content-end">
+                                <div className="col-12 col-md-4 d-flex justify-content-center justify-content-md-end">
                                   <div className="text-white">
                                     <p className="mb-0">
-                                      BILL #<b>{salesBill.bill_number}</b>
+                                    INVOICE #<b>{salesBill.bill_number}</b>
                                     </p>
                                     <p className="mb-0">
                                       Date:
@@ -583,7 +585,7 @@ function ViewSales() {
                                     {cmp.company_name}
                                   </h5>
                                   <p
-                                    className="address"
+                                    className="address text-truncate"
                                     style={{
                                       fontWeight: "normal",
                                       color: "#000",
@@ -649,8 +651,8 @@ function ViewSales() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row mt-3">
-                                <div className="col-md-12">
+                              {/* <div className="row mt-3"> */}
+                                <div className="table-responsive">
                                   <table className="table table-hover table-bordered border-dark table-secondary">
                                     <thead className="table-dark">
                                       <tr className="templatetablehead">
@@ -693,11 +695,10 @@ function ViewSales() {
                                     </tbody>
                                   </table>
                                 </div>
-                              </div>
-                              <div className="row mt-3">
-                                <div className="col-4" />
-                                <div className="col-4" />
-                                <div className="col-4">
+                              {/* </div> */}
+                              <div className="row mt-3 px-2">
+                                <div className="col-12 col-md-6"></div>
+                                <div className="col-12 col-md-6">
                                   <table className="table table-borderless">
                                     <tbody>
                                       <tr>

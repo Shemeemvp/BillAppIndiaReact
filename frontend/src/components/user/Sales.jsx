@@ -210,55 +210,57 @@ function Sales() {
             <main style={{ background: "#fff" }}>
               <div className="container-fluid">
                 <div className="sales_section py-4">
-                  <div className="row">
-                    <div className="col-md-12">
+                  {/* <div className="row"> */}
+                    {/* <div className="col-md-12"> */}
                       <div
                         className="all_sales"
                         style={{ background: "#eae9c4" }}
                       >
                         <div className="all_sales_table px-1 py-2 border rounded-1">
-                          <div className="top d-flex justify-content-between px-2 py-3">
-                            <div className="sales_head">
+                          <div className="row top px-2">
+                            <div className="col-12 col-md-4 sales_head">
                               <h4>All Sales</h4>
                             </div>
-                            <form className="date-filter d-flex align-items-center justify-content-between">
-                              <div className="form-group">
-                                <input
-                                  type="date"
-                                  className="form-control form-control-sm"
-                                  name="start_date"
-                                  id="from-date"
-                                  value={startDate}
-                                  onChange={(e) => setStartDate(e.target.value)}
-                                  required
-                                />
-                              </div>
-                              <label htmlFor="" className="mx-2">
-                                to
-                              </label>
-                              <div className="form-group">
-                                <input
-                                  type="date"
-                                  className="form-control form-control-sm"
-                                  name="end_date"
-                                  id="to-date"
-                                  value={endDate}
-                                  onChange={(e) => setEndDate(e.target.value)}
-                                  required
-                                />
-                              </div>
-                              <button
-                                type="button"
-                                onClick={filterTableRows}
-                                className="btn btn-sm fltr_btn ms-2"
-                              >
-                                <i className="fa-solid fa-filter me-2" />
-                                Filter
-                              </button>
-                            </form>
+                            <div className="col-12 col-md-8">
+                              <form className="date-filter d-block d-md-flex align-items-center justify-content-end">
+                                <div className="form-group">
+                                  <input
+                                    type="date"
+                                    className="form-control form-control-sm"
+                                    name="start_date"
+                                    id="from-date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    required
+                                  />
+                                </div>
+                                <label htmlFor="" className="mx-1">
+                                  to
+                                </label>
+                                <div className="form-group">
+                                  <input
+                                    type="date"
+                                    className="form-control form-control-sm"
+                                    name="end_date"
+                                    id="to-date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    required
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={filterTableRows}
+                                  className="btn btn-sm fltr_btn mt-md-0 mt-2 ms-0 ms-md-2"
+                                >
+                                  <i className="fa-solid fa-filter me-1" />
+                                  Filter
+                                </button>
+                              </form>
+                            </div>
                           </div>
-                          <div className="row px-2">
-                            <div className="col-md-6 d-flex justify-content-start">
+                          <div className="row px-2 mt-3">
+                            <div className="col-8 d-flex justify-content-start">
                               <input
                                 type="search"
                                 id="sales_search_box"
@@ -275,7 +277,7 @@ function Sales() {
                                 SALE
                               </button>
                             </div>
-                            <div className="col-md-6 d-flex justify-content-end">
+                            <div className="col-4 d-flex justify-content-end">
                               <button
                                 className="btn print_btn btn-sm ms-2"
                                 onClick={() =>
@@ -301,7 +303,7 @@ function Sales() {
                                     DATE
                                   </th>
                                   <th scope="col" className="col-2">
-                                    BILL NO.
+                                    INVOICE NO.
                                   </th>
                                   <th scope="col" className="col-3">
                                     PARTY NAME
@@ -342,8 +344,8 @@ function Sales() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    {/* </div> */}
+                  {/* </div> */}
                 </div>
               </div>
             </main>
@@ -370,7 +372,7 @@ function Sales() {
                 DATE
               </th>
               <th scope="col" className="col-2">
-                BILL NO.
+                INVOICE NO.
               </th>
               <th scope="col" className="col-3">
                 PARTY NAME

@@ -150,3 +150,29 @@
     font-size: large;
   }
 }
+
+@media (max-width: 576px) {
+  /* SLIP VIEW STYLINGS */
+  .userViewSale p {
+    font-size: 1em;
+  }
+  .userViewSale .address p,
+  .userViewSale .footer p {
+    font-size: 1rem;
+    margin: 0;
+  }
+  .userViewSale .slip-container {
+    width: 100%;
+    margin: 1rem auto;
+    padding: 0.8rem;
+  }
+  .userViewSale .divider {
+    margin: 1rem 0;
+    border-bottom: 3px dotted black;
+  }
+  .userViewSale .trns-id p,
+  .userViewSale .datetime p {
+    font-size: 0.85rem;
+    margin: 0;
+  }
+}

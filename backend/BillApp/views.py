@@ -988,7 +988,7 @@ def getItems(request, id):
 
         itms = Items.objects.filter(cid=cmp)
         iData = Items.objects.filter(cid=cmp).first()
-        trans = Item_transactions.objects.filter(cid=cmp, item=iData).order_by("-id")
+        trans = Item_transactions.objects.filter(cid=cmp, item=iData)
 
         serializer = ItemSerializer(itms, many=True)
         itemSerializer = ItemSerializer(iData)
@@ -1014,7 +1014,7 @@ def getItems(request, id):
 def getItemDetails(request):
     try:
         iData = Items.objects.get(id=request.GET["itemId"])
-        trans = Item_transactions.objects.filter(item=iData).order_by("-id")
+        trans = Item_transactions.objects.filter(item=iData)
 
         trns = Item_transactions.objects.get(item=iData, type="Opening Stock")
         op_stock = trns.quantity

@@ -309,7 +309,7 @@ function PurchaseReports() {
 
     var wb = XLSX.utils.book_new();
 
-    var header = [["#", "Date", "Invoice No.", "Party Name", "Amount"]];
+    var header = [["#", "Date", "Bill No.", "Party Name", "Amount"]];
 
     var customSheet = XLSX.utils.aoa_to_sheet(header);
 
@@ -539,7 +539,7 @@ function PurchaseReports() {
   return (
     <>
       <div
-        className="container-fluid position-relative d-flex p-0 userStockReports userSalesReports"
+        className="container-fluid position-relative d-flex p-0 userSalesReports"
         id="userSection"
       >
         <UserSidebar />
@@ -548,431 +548,426 @@ function PurchaseReports() {
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">
               <div className="stock_reports_section py-4">
-                <div className="row">
-                  <div className="col-md-12">
-                    <div
-                      className="all_stock_reports"
-                      style={{ background: "#eae9c4" }}
-                    >
-                      <div
-                        className="all_stock_reports_table px-1 py-2 border rounded-1"
-                        id="salesReports"
-                        style={{ display: graphMode ? "none" : "block" }}
-                      >
-                        <div className="row px-2">
-                          <div className="col-md-5 d-flex justify-content-start align-items-center">
-                            <label
-                              htmlFor=""
-                              style={{
-                                color: "rgb(0, 0, 0)",
-                                fontSize: "1.3vw",
-                              }}
-                            >
-                              <b>Date</b>
-                            </label>
-                            <input
-                              type="date"
-                              id="fromDate"
-                              className="form-control ms-1 form-control-sm"
-                              value={startDate}
-                              onChange={(e) =>
-                                handleStartDateChange(e.target.value)
-                              }
-                            />
-                            <label
-                              htmlFor=""
-                              style={{
-                                color: "rgb(0, 0, 0)",
-                                fontSize: "1.3vw",
-                              }}
-                              className="mx-1"
-                            >
-                              to
-                            </label>
-                            <input
-                              type="date"
-                              id="toDate"
-                              value={endDate}
-                              onChange={(e) =>
-                                handleEndDateChange(e.target.value)
-                              }
-                              className="form-control form-control-sm"
-                            />
-                          </div>
-                          <div className="col-md-7 d-flex justify-content-end">
-                            <button
-                              className="btn btn-sm action_btns ms-2"
-                              onClick={() => printSection("report")}
-                            >
-                              <i className="fas fa-print me-2" />
-                              PRINT
-                            </button>
-                            <button
-                              className="btn btn-sm action_btns ms-2"
-                              onClick={() => exportToExcel("xlsx")}
-                            >
-                              <i className="fas fa-print me-2" />
-                              EXCEL
-                            </button>
-                            <button
-                              className="btn btn-sm action_btns ms-2"
-                              onClick={generatePdf}
-                            >
-                              <i className="fas fa-file-pdf me-2" />
-                              PDF
-                            </button>
-                            <button
-                              className="btn btn-sm action_btns ms-2"
-                              onClick={() => setGraphMode(true)}
-                            >
-                              <i className="fas fa-chart-line me-2" />
-                              GRAPH
-                            </button>
-                            <div class="dropdown">
-                              <button
-                                class="btn action_btns btn-sm ms-2 dropdown-toggle"
-                                type="button"
-                                id="dropdownMenuButton1"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
+                {/* <div className="row"> */}
+                {/* <div className="col-md-12"> */}
+                <div
+                  className="all_stock_reports"
+                  style={{ background: "#eae9c4" }}
+                >
+                  <div
+                    className="all_stock_reports_table px-1 py-2 border rounded-1"
+                    id="salesReports"
+                    style={{ display: graphMode ? "none" : "block" }}
+                  >
+                    <div className="row px-2">
+                      <div className="col-12 col-md-5 d-block d-md-flex justify-content-start align-items-center">
+                        <label
+                          htmlFor=""
+                          style={{
+                            color: "rgb(0, 0, 0)",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <b>Date</b>
+                        </label>
+                        <input
+                          type="date"
+                          id="fromDate"
+                          className="form-control ms-1 form-control-sm"
+                          value={startDate}
+                          onChange={(e) =>
+                            handleStartDateChange(e.target.value)
+                          }
+                        />
+                        <label
+                          htmlFor=""
+                          style={{
+                            color: "rgb(0, 0, 0)",
+                            fontSize: "1rem",
+                          }}
+                          className="mx-1"
+                        >
+                          to
+                        </label>
+                        <input
+                          type="date"
+                          id="toDate"
+                          value={endDate}
+                          onChange={(e) => handleEndDateChange(e.target.value)}
+                          className="form-control form-control-sm"
+                        />
+                      </div>
+                      <div className="col-12 col-md-7 d-flex justify-content-md-end justify-content-center mt-2 mt-md-0">
+                        <button
+                          className="btn btn-sm action_btns"
+                          onClick={() => printSection("report")}
+                        >
+                          <i className="fas fa-print me-1" />
+                          Print
+                        </button>
+                        <button
+                          className="btn btn-sm action_btns ms-1"
+                          onClick={() => exportToExcel("xlsx")}
+                        >
+                          <i className="fas fa-table me-1" />
+                          Excel
+                        </button>
+                        <button
+                          className="btn btn-sm action_btns ms-1"
+                          onClick={generatePdf}
+                        >
+                          <i className="fas fa-file-pdf me-1" />
+                          Pdf
+                        </button>
+                        <button
+                          className="btn btn-sm action_btns ms-1"
+                          onClick={() => setGraphMode(true)}
+                        >
+                          <i className="fas fa-chart-line me-1" />
+                          Graph
+                        </button>
+                        <div class="dropdown">
+                          <button
+                            class="btn action_btns btn-sm ms-1 dropdown-toggle"
+                            type="button"
+                            id="dropdownMenuButton1"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            <i className="fas fa-mail-bulk me-1" />
+                            Share
+                          </button>
+                          <ul
+                            class="dropdown-menu"
+                            aria-labelledby="dropdownMenuButton1"
+                          >
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                href={shareUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
                               >
-                                <i className="fas fa-mail-bulk me-1" />
-                                Share
-                              </button>
-                              <ul
-                                class="dropdown-menu"
-                                aria-labelledby="dropdownMenuButton1"
+                                WhatsApp
+                              </a>
+                            </li>
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                data-bs-toggle="modal"
+                                href="#shareReportEmail"
                               >
-                                <li>
-                                  <a
-                                    class="dropdown-item"
-                                    href={shareUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    WhatsApp
-                                  </a>
-                                </li>
-                                <li>
-                                  <a
-                                    class="dropdown-item"
-                                    data-bs-toggle="modal"
-                                    href="#shareReportEmail"
-                                  >
-                                    Mail
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="row mt-4" id="report">
-                          <h2>
-                            <ul
-                              style={{
-                                textAlign: "center",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {company.company_name}
-                            </ul>
-                          </h2>
-                          <h3>
-                            <ul style={{ textAlign: "center" }}>
-                              Purchase Report
-                            </ul>
-                          </h3>
-                          <div
-                            id="dateDisplay"
-                            style={{
-                              marginBottom: 10,
-                              color: "black",
-                              marginLeft: "40%",
-                            }}
-                          />
-
-                          <div className="stock_reports_table_section table-responsive">
-                            <table
-                              className="table table-responsive-md mt-2 table-hover stock_reports_table"
-                              style={{ textAlign: "center" }}
-                              id="sales_reports_table"
-                            >
-                              <thead>
-                                <tr id="tableHeadings">
-                                  <th>#</th>
-                                  <th>
-                                    DATE
-                                    <a onClick={() => toggleDropdown(1)}>
-                                      &nbsp;
-                                      <i
-                                        className="fa fa-filter"
-                                        aria-hidden="true"
-                                      />
-                                    </a>
-                                    <div
-                                      className="dropdown-content"
-                                      id="dropdownContent1"
-                                    >
-                                      <label
-                                        htmlFor="filterInput1"
-                                        style={{
-                                          color: "black",
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Equal To
-                                      </label>
-                                      <input type="date" id="filterInput1" />
-                                      <div className="button-row">
-                                        <a
-                                          className="btn"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => clearDropdown(1)}
-                                        >
-                                          Clear
-                                        </a>
-                                        <a
-                                          className="btn ms-1"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => filterTable(1)}
-                                        >
-                                          Apply
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </th>
-                                  <th>
-                                    INVOICE NO
-                                    <a onClick={() => toggleDropdown(2)}>
-                                      &nbsp;
-                                      <i
-                                        className="fa fa-filter"
-                                        aria-hidden="true"
-                                      />
-                                    </a>
-                                    <div
-                                      className="dropdown-content"
-                                      id="dropdownContent2"
-                                    >
-                                      <label
-                                        htmlFor="filterInput2"
-                                        style={{
-                                          color: "black",
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Equal To
-                                      </label>
-                                      <input type="text" id="filterInput2" />
-                                      <div className="button-row">
-                                        <a
-                                          className="btn"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => clearDropdown(2)}
-                                        >
-                                          Clear
-                                        </a>
-                                        &nbsp;
-                                        <a
-                                          className="btn ms-1"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => filterTable(2)}
-                                        >
-                                          Apply
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </th>
-                                  <th>
-                                    PARTY NAME
-                                    <a onClick={() => toggleDropdown(3)}>
-                                      &nbsp;
-                                      <i
-                                        className="fa fa-filter"
-                                        aria-hidden="true"
-                                      />
-                                    </a>
-                                    <div
-                                      className="dropdown-content"
-                                      id="dropdownContent3"
-                                    >
-                                      <label
-                                        htmlFor="filterInput3"
-                                        style={{
-                                          color: "black",
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Equal To
-                                      </label>
-                                      <input type="text" id="filterInput3" />
-                                      <div className="button-row">
-                                        <a
-                                          className="btn"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => clearDropdown(3)}
-                                        >
-                                          Clear
-                                        </a>
-                                        &nbsp;
-                                        <a
-                                          className="btn ms-1"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => filterTable(3)}
-                                        >
-                                          Apply
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </th>
-                                  <th>
-                                    AMOUNT
-                                    <a onClick={() => toggleDropdown(4)}>
-                                      &nbsp;
-                                      <i
-                                        className="fa fa-filter"
-                                        aria-hidden="true"
-                                      />
-                                    </a>
-                                    <div
-                                      className="dropdown-content"
-                                      id="dropdownContent4"
-                                    >
-                                      <label
-                                        htmlFor="filterInput4"
-                                        style={{
-                                          color: "black",
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Equal To
-                                      </label>
-                                      <input type="text" id="filterInput4" />
-                                      <div className="button-row">
-                                        <a
-                                          className="btn"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => clearDropdown(4)}
-                                        >
-                                          Clear
-                                        </a>
-                                        &nbsp;
-                                        <a
-                                          className="btn ms-1"
-                                          style={{ backgroundColor: "#1d8d68" }}
-                                          onClick={() => filterTable(4)}
-                                        >
-                                          Apply
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {purchases.map((i, index) => (
-                                  <tr>
-                                    <td>{index + 1}</td>
-                                    <td>{i.date}</td>
-                                    <td>{i.bill_number}</td>
-                                    <td>
-                                      {i.party_name != ""
-                                        ? i.party_name
-                                        : "Nill"}
-                                    </td>
-                                    <td>{i.total_amount}</td>
-                                  </tr>
-                                ))}
-                                {purchases.length ? (
-                                  <tr>
-                                    <td colSpan="4">
-                                      <strong>Total Purchase Amount:</strong>
-                                    </td>
-                                    <td>
-                                      <strong>{totalPurchases || 0}</strong>
-                                    </td>
-                                  </tr>
-                                ) : null}
-                              </tbody>
-                            </table>
-                          </div>
+                                Mail
+                              </a>
+                            </li>
+                          </ul>
                         </div>
                       </div>
+                    </div>
 
+                    <div className="row mt-4" id="report">
+                      <h2>
+                        <ul
+                          style={{
+                            textAlign: "center",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {company.company_name}
+                        </ul>
+                      </h2>
+                      <h3>
+                        <ul style={{ textAlign: "center" }}>Purchase Report</ul>
+                      </h3>
                       <div
-                        id="salesReportsGraph"
-                        className="mx-auto w-75"
-                        style={{ display: graphMode ? "block" : "none" }}
+                        id="dateDisplay"
+                        style={{
+                          color: "black",
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      ></div>
+                    </div>
+
+                    <div className="stock_reports_table_section table-responsive">
+                      <table
+                        className="table mt-2 table-hover stock_reports_table"
+                        style={{ textAlign: "center" }}
+                        id="sales_reports_table"
                       >
-                        <div className="chartSectionHead">
-                          <div className="d-flex justify-content-end">
-                            <div className="ml-auto">
-                              <a
-                                onClick={() => setGraphMode(false)}
-                                style={{
-                                  fontSize: "x-large",
-                                  color: "black",
-                                  cursor: "pointer",
-                                }}
-                                title="Close"
-                              >
+                        <thead>
+                          <tr id="tableHeadings">
+                            <th>#</th>
+                            <th>
+                              DATE
+                              <a onClick={() => toggleDropdown(1)}>
+                                &nbsp;
                                 <i
-                                  className="fa fa-times-circle fs-6 tb close_pad mt-4 "
+                                  className="fa fa-filter"
                                   aria-hidden="true"
                                 />
                               </a>
-                            </div>
-                          </div>
-                          <form id="chartToggleForm">
-                            <label>
-                              <input
-                                type="radio"
-                                name="chartType"
-                                value="monthly"
-                                checked={graphMonthlyType}
-                                onChange={() =>
-                                  setGraphMonthlyType((prev) => !prev)
-                                }
-                              />
-                              Monthly
-                            </label>
-                            <label className="ms-3">
-                              <input
-                                type="radio"
-                                name="chartType"
-                                value="yearly"
-                                onChange={() =>
-                                  setGraphMonthlyType((prev) => !prev)
-                                }
-                              />
-                              Yearly
-                            </label>
-                          </form>
-                        </div>
+                              <div
+                                className="dropdown-content"
+                                id="dropdownContent1"
+                              >
+                                <label
+                                  htmlFor="filterInput1"
+                                  style={{
+                                    color: "black",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Equal To
+                                </label>
+                                <input type="date" id="filterInput1" />
+                                <div className="button-row">
+                                  <a
+                                    className="btn"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => clearDropdown(1)}
+                                  >
+                                    Clear
+                                  </a>
+                                  <a
+                                    className="btn ms-1"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => filterTable(1)}
+                                  >
+                                    Apply
+                                  </a>
+                                </div>
+                              </div>
+                            </th>
+                            <th>
+                              BILL NO
+                              <a onClick={() => toggleDropdown(2)}>
+                                &nbsp;
+                                <i
+                                  className="fa fa-filter"
+                                  aria-hidden="true"
+                                />
+                              </a>
+                              <div
+                                className="dropdown-content"
+                                id="dropdownContent2"
+                              >
+                                <label
+                                  htmlFor="filterInput2"
+                                  style={{
+                                    color: "black",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Equal To
+                                </label>
+                                <input type="text" id="filterInput2" />
+                                <div className="button-row">
+                                  <a
+                                    className="btn"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => clearDropdown(2)}
+                                  >
+                                    Clear
+                                  </a>
+                                  &nbsp;
+                                  <a
+                                    className="btn ms-1"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => filterTable(2)}
+                                  >
+                                    Apply
+                                  </a>
+                                </div>
+                              </div>
+                            </th>
+                            <th>
+                              PARTY NAME
+                              <a onClick={() => toggleDropdown(3)}>
+                                &nbsp;
+                                <i
+                                  className="fa fa-filter"
+                                  aria-hidden="true"
+                                />
+                              </a>
+                              <div
+                                className="dropdown-content"
+                                id="dropdownContent3"
+                              >
+                                <label
+                                  htmlFor="filterInput3"
+                                  style={{
+                                    color: "black",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Equal To
+                                </label>
+                                <input type="text" id="filterInput3" />
+                                <div className="button-row">
+                                  <a
+                                    className="btn"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => clearDropdown(3)}
+                                  >
+                                    Clear
+                                  </a>
+                                  &nbsp;
+                                  <a
+                                    className="btn ms-1"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => filterTable(3)}
+                                  >
+                                    Apply
+                                  </a>
+                                </div>
+                              </div>
+                            </th>
+                            <th>
+                              AMOUNT
+                              <a onClick={() => toggleDropdown(4)}>
+                                &nbsp;
+                                <i
+                                  className="fa fa-filter"
+                                  aria-hidden="true"
+                                />
+                              </a>
+                              <div
+                                className="dropdown-content"
+                                id="dropdownContent4"
+                              >
+                                <label
+                                  htmlFor="filterInput4"
+                                  style={{
+                                    color: "black",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Equal To
+                                </label>
+                                <input type="text" id="filterInput4" />
+                                <div className="button-row">
+                                  <a
+                                    className="btn"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => clearDropdown(4)}
+                                  >
+                                    Clear
+                                  </a>
+                                  &nbsp;
+                                  <a
+                                    className="btn ms-1"
+                                    style={{ backgroundColor: "#1d8d68" }}
+                                    onClick={() => filterTable(4)}
+                                  >
+                                    Apply
+                                  </a>
+                                </div>
+                              </div>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {purchases.map((i, index) => (
+                            <tr>
+                              <td>{index + 1}</td>
+                              <td>{i.date}</td>
+                              <td>{i.bill_number}</td>
+                              <td>
+                                {i.party_name != "" ? i.party_name : "Nill"}
+                              </td>
+                              <td>{i.total_amount}</td>
+                            </tr>
+                          ))}
+                          {purchases.length ? (
+                            <tr>
+                              <td colSpan="4">
+                                <strong>Total Purchase Amount:</strong>
+                              </td>
+                              <td>
+                                <strong>{totalPurchases || 0}</strong>
+                              </td>
+                            </tr>
+                          ) : null}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
 
-                        <div className="chartSection">
-                          <div
-                            id="monthlyChartContainer"
+                  <div
+                    id="salesReportsGraph"
+                    className="mx-auto w-75"
+                    style={{ display: graphMode ? "block" : "none" }}
+                  >
+                    <div className="chartSectionHead">
+                      <div className="d-flex justify-content-end">
+                        <div className="ml-auto">
+                          <a
+                            onClick={() => setGraphMode(false)}
                             style={{
-                              display: graphMonthlyType ? "block" : "none",
+                              fontSize: "x-large",
+                              color: "black",
+                              cursor: "pointer",
                             }}
+                            title="Close"
                           >
-                            <canvas id="monthlyChart" />
-                          </div>
-                          <div
-                            id="yearlyChartContainer"
-                            style={{
-                              display: !graphMonthlyType ? "block" : "none",
-                            }}
-                          >
-                            <canvas id="yearlyChart" />
-                          </div>
+                            <i
+                              className="fa fa-times-circle fs-6 tb close_pad mt-4 "
+                              aria-hidden="true"
+                            />
+                          </a>
                         </div>
+                      </div>
+                      <form id="chartToggleForm">
+                        <label>
+                          <input
+                            type="radio"
+                            name="chartType"
+                            value="monthly"
+                            checked={graphMonthlyType}
+                            onChange={() =>
+                              setGraphMonthlyType((prev) => !prev)
+                            }
+                          />
+                          Monthly
+                        </label>
+                        <label className="ms-3">
+                          <input
+                            type="radio"
+                            name="chartType"
+                            value="yearly"
+                            onChange={() =>
+                              setGraphMonthlyType((prev) => !prev)
+                            }
+                          />
+                          Yearly
+                        </label>
+                      </form>
+                    </div>
+
+                    <div className="chartSection">
+                      <div
+                        id="monthlyChartContainer"
+                        style={{
+                          display: graphMonthlyType ? "block" : "none",
+                        }}
+                      >
+                        <canvas id="monthlyChart" />
+                      </div>
+                      <div
+                        id="yearlyChartContainer"
+                        style={{
+                          display: !graphMonthlyType ? "block" : "none",
+                        }}
+                      >
+                        <canvas id="yearlyChart" />
                       </div>
                     </div>
                   </div>
                 </div>
+                {/* </div> */}
+                {/* </div> */}
               </div>
             </div>
           </main>
@@ -1089,7 +1084,7 @@ function PurchaseReports() {
               <tr>
                 <th>#</th>
                 <th>DATE</th>
-                <th>INVOICE NO</th>
+                <th>BILL NO</th>
                 <th>PARTY NAME</th>
                 <th>AMOUNT</th>
               </tr>

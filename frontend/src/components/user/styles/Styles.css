@@ -86,3 +86,35 @@
   cursor: pointer;
   border-radius: 3px;
 }
+
+.userSalesReports .action_btns {
+  background: #0d533ae6;
+  font-weight: 500;
+  color: white;
+  font-size: 15px;
+}
+
+@media (max-width : 430px){
+  .userSalesReports .action_btns {
+    font-size: 12px;
+  }
+
+  #dropdownContent4, #dropdownContent3{
+    right: 0;
+  }
+}
+
+@media (min-width : 431px) and (max-width: 525px){
+  .userSalesReports .action_btns {
+    font-size: 13px;
+  }
+  #dropdownContent4, #dropdownContent3{
+    right: 0;
+  }
+}
+
+@media (min-width : 526px) and (max-width: 768px){
+  .userSalesReports .action_btns {
+    font-size: 14px;
+  }
+}

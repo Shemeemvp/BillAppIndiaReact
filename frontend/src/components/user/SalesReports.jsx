@@ -536,7 +536,7 @@ function SalesReports() {
   return (
     <>
       <div
-        className="container-fluid position-relative d-flex p-0 userStockReports userSalesReports"
+        className="container-fluid position-relative d-flex p-0 userSalesReports"
         id="userSection"
       >
         <UserSidebar />
@@ -545,8 +545,8 @@ function SalesReports() {
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">
               <div className="stock_reports_section py-4">
-                <div className="row">
-                  <div className="col-md-12">
+                {/* <div className="row"> */}
+                  {/* <div className="col-md-12"> */}
                     <div
                       className="all_stock_reports"
                       style={{ background: "#eae9c4" }}
@@ -557,12 +557,12 @@ function SalesReports() {
                         style={{ display: graphMode ? "none" : "block" }}
                       >
                         <div className="row px-2">
-                          <div className="col-md-5 d-flex justify-content-start align-items-center">
+                          <div className="col-12 col-sm-12 col-md-5 d-block d-md-flex justify-content-start align-items-center">
                             <label
                               htmlFor=""
                               style={{
                                 color: "rgb(0, 0, 0)",
-                                fontSize: "1.3vw",
+                                fontSize: "1rem",
                               }}
                             >
                               <b>Date</b>
@@ -580,7 +580,7 @@ function SalesReports() {
                               htmlFor=""
                               style={{
                                 color: "rgb(0, 0, 0)",
-                                fontSize: "1.3vw",
+                                fontSize: "1rem",
                               }}
                               className="mx-1"
                             >
@@ -596,38 +596,38 @@ function SalesReports() {
                               className="form-control form-control-sm"
                             />
                           </div>
-                          <div className="col-md-7 d-flex justify-content-end">
+                          <div className="col-12 col-sm-12 col-md-7 d-flex justify-content-center justify-content-md-end mt-2 mt-md-0">
                             <button
-                              className="btn btn-sm action_btns ms-2"
+                              className="btn btn-sm action_btns"
                               onClick={() => printSection("report")}
                             >
-                              <i className="fas fa-print me-2" />
-                              PRINT
+                              <i className="fas fa-print me-1" />
+                              Print
                             </button>
                             <button
-                              className="btn btn-sm action_btns ms-2"
+                              className="btn btn-sm action_btns ms-1"
                               onClick={() => exportToExcel("xlsx")}
                             >
-                              <i className="fas fa-print me-2" />
-                              EXCEL
+                              <i className="fas fa-table me-1" />
+                              Excel
                             </button>
                             <button
-                              className="btn btn-sm action_btns ms-2"
+                              className="btn btn-sm action_btns ms-1"
                               onClick={generatePdf}
                             >
-                              <i className="fas fa-file-pdf me-2" />
-                              PDF
+                              <i className="fas fa-file-pdf me-1" />
+                              Pdf
                             </button>
                             <button
-                              className="btn btn-sm action_btns ms-2"
+                              className="btn btn-sm action_btns ms-1"
                               onClick={() => setGraphMode(true)}
                             >
-                              <i className="fas fa-chart-line me-2" />
-                              GRAPH
+                              <i className="fas fa-chart-line me-1" />
+                              Graph
                             </button>
                             <div class="dropdown">
                               <button
-                                class="btn action_btns btn-sm ms-2 dropdown-toggle"
+                                class="btn action_btns btn-sm ms-1 dropdown-toggle"
                                 type="button"
                                 id="dropdownMenuButton1"
                                 data-bs-toggle="dropdown"
@@ -683,15 +683,17 @@ function SalesReports() {
                           <div
                             id="dateDisplay"
                             style={{
-                              marginBottom: 10,
                               color: "black",
-                              marginLeft: "40%",
+                              width: "100%",
+                              display: "flex",
+                              justifyContent: "center"
                             }}
-                          />
+                            ></div>
 
+                          </div>
                           <div className="stock_reports_table_section table-responsive">
                             <table
-                              className="table table-responsive-md mt-2 table-hover stock_reports_table"
+                              className="table mt-2 table-hover stock_reports_table"
                               style={{ textAlign: "center" }}
                               id="sales_reports_table"
                             >
@@ -884,7 +886,6 @@ function SalesReports() {
                               </tbody>
                             </table>
                           </div>
-                        </div>
                       </div>
 
                       <div
@@ -958,8 +959,8 @@ function SalesReports() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  {/* </div> */}
+                {/* </div> */}
               </div>
             </div>
           </main>

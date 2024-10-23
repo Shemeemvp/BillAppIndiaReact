@@ -287,8 +287,8 @@ function StockReports() {
           <main style={{ background: "#fff" }}>
             <div className="container-fluid">
               <div className="stock_reports_section py-4">
-                <div className="row">
-                  <div className="col-md-12">
+                {/* <div className="row"> */}
+                  {/* <div className="col-md-12"> */}
                     <div
                       className="all_stock_reports"
                       style={{ background: "#eae9c4" }}
@@ -300,7 +300,7 @@ function StockReports() {
                           </div>
                         </div>
                         <div className="row px-2">
-                          <div className="col-md-6 d-flex justify-content-start">
+                          <div className="col-12 col-md-6 d-flex justify-content-start">
                             <Select
                               options={items}
                               styles={customStyles}
@@ -317,25 +317,25 @@ function StockReports() {
                               isSearchable
                             />
                           </div>
-                          <div className="col-md-6 d-flex justify-content-end">
+                          <div className="col-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-2 mt-md-0">
                             <button
-                              className="btn action_btns ms-2"
+                              className="btn action_btns ms-0 ms-md-2"
                               onClick={() =>
                                 printSection("print_stock_reports")
                               }
                             >
-                              <i className="fas fa-print me-2" />
+                              <i className="fas fa-print me-1" />
                               PRINT
                             </button>
                             <button
-                              className="btn action_btns ms-2"
+                              className="btn action_btns ms-1"
                               onClick={() => ExportToExcel("xlsx")}
                             >
-                              <i className="fas fa-print me-2" />
+                              <i className="fas fa-table me-1" />
                               EXCEL
                             </button>
                             <button
-                              className="btn action_btns ms-2"
+                              className="btn action_btns ms-1"
                               data-bs-toggle="modal"
                               data-bs-target="#shareReportEmail"
                             >
@@ -398,8 +398,8 @@ function StockReports() {
                         ) : null}
                       </div>
                     </div>
-                  </div>
-                </div>
+                  {/* </div> */}
+                {/* </div> */}
               </div>
             </div>
           </main>

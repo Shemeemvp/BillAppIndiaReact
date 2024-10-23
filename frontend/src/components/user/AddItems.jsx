@@ -225,6 +225,7 @@ function AddItems() {
               setPurchasePrice(0);
               setSalesPrice(0);
               setStock(0);
+              closeBarcode();
             }
           }
           if (!res.data.status && res.data.message != "") {

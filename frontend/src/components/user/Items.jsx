@@ -150,6 +150,7 @@ function Items() {
             });
             refreshItemDetails(item.id);
             document.getElementById("stockAdjModalClose").click();
+            setStockAdjQty("");
           }
         })
         .catch((err) => {
@@ -465,11 +466,11 @@ function Items() {
                     </div>
                     <div className="col-md-8">
                       <div className="item_details px-1 py-2 border rounded-1 mb-3">
-                        <div className="item_data_top px-2 d-flex justify-content-between">
-                          <div className="item_name">
+                        <div className="row item_data_top px-2 d-flex justify-content-between">
+                          <div className="col-12 col-md-5 item_name">
                             <h4>{item.name}</h4>
                           </div>
-                          <div className="item_actions d-flex">
+                          <div className="col-12 col-md-7 item_actions d-flex justify-content-end">
                             <div className="edit_item_btn">
                               <button
                                 className="btn btn-sm itm-action-btn me-1"
@@ -521,11 +522,11 @@ function Items() {
                       </div>
                       <div className="item_transactions">
                         <div className="item_transaction_table px-1 py-2 border rounded-1">
-                          <div className="top d-flex justify-content-between">
-                            <div className="trns_head">
+                          <div className="row top d-flex justify-content-between">
+                            <div className="col-12 col-md-5 trns_head">
                               <h4>Transactions</h4>
                             </div>
-                            <div className="d-flex justify-content-end">
+                            <div className="col-12 col-md-7 d-flex justify-content-end">
                               <input
                                 type="search"
                                 id="transaction_search_box"
@@ -598,7 +599,13 @@ function Items() {
                                                   ? "black"
                                                   : "gray",
                                             }}
-                                            data-bs-toggle="dropdown"
+                                            data-bs-toggle={
+                                              i.type != "Sale" &&
+                                              i.type != "Purchase" &&
+                                              i.type != "Opening Stock"
+                                                ? "dropdown"
+                                                : ""
+                                            }
                                           />
                                           {i.type != "Sale" &&
                                           i.type != "Purchase" &&

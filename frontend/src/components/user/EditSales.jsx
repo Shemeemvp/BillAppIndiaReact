@@ -898,7 +898,7 @@ function EditSales() {
                           </div>
                           <div className="col-md-6 col-lg-6">
                             <div className="form-group">
-                              <label htmlFor="item_hsn">Bill No.</label>
+                              <label htmlFor="item_hsn">Invoice No.</label>
                               <input
                                 type="number"
                                 name="bill_no"
